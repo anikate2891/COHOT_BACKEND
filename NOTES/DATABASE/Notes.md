@@ -1,0 +1,2 @@
+- Database Server
+    - npm i mongoose use for connect vs code to database
