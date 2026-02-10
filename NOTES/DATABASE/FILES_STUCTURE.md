@@ -2,17 +2,26 @@
     - dotenv req
     - database & app connect
 
-- config
-    - database.js:
-        - mongoose req
-        - connectoDB() create & export
-
-- models
+- src
     - app.js:
         - express req & call
         - notemodel connect
         - makes notes [post, get, delete, etc]
         - export app
-    - notes.model.js:
-        - create schema & notemodel
-        - export notemodel
+        - req cookie-parser & called
+
+        - config
+            - database.js:
+            - mongoose req
+            - connectoDB() create & export
+
+        - models
+            - notes.model.js:
+            - create schema & notemodel
+            - export notemodel
+
+        - rouths
+            - auth.rouths.js:
+            - req express & notemodel
+            - create api's
+            - req jasonwebtoken {jwt}
