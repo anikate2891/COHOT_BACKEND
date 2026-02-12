@@ -25,3 +25,4 @@
             - req express & notemodel
             - create api's
             - req jasonwebtoken {jwt}
+            - call cookie [res.cookie()]
