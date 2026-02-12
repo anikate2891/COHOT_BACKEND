@@ -27,17 +27,19 @@ authrouter.post("/register", async (req, res) => {
 
 authrouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
+// User finding proccess
   const user = await usermodel.findOne({ email });
   if (!user) {
     return res.status(400).json({ msg: "User not found" });
   }
-
   const ispasswordcorrect =
     user.password ===
     crypto.createHash("md5").update(password).digest("hex"); /*NEW*/
   if (!ispasswordcorrect) {
     return res.status(400).json({ msg: "Invalid credentials! Password Wrong" });
   }
+// User find process end
 
   const token = jwt.sign(
     { id: user._id, email: user.email },
@@ -47,6 +49,7 @@ authrouter.post("/login", async (req, res) => {
   res.cookie("jwt_token", token);
   res.status(200).json({ msg: "User logged in successfully", user, token });
 });
+
 
 authrouter.get("/register", async (req, res) => {
   const users = await usermodel.find();

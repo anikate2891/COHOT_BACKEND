@@ -1,14 +1,14 @@
 - server.js:
     - dotenv req
     - database & app connect
+    - call dotenv
 
 - src
     - app.js:
         - express req & call
-        - notemodel connect
-        - makes notes [post, get, delete, etc]
-        - export app
+        - req routh & called
         - req cookie-parser & called
+        - export app
 
         - config
             - database.js:
@@ -22,7 +22,8 @@
 
         - rouths
             - auth.rouths.js:
-            - req express & notemodel
+            - req express(Router) & notemodel
             - create api's
             - req jasonwebtoken {jwt}
+            - req crypto
             - call cookie [res.cookie()]
