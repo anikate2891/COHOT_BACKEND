@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../models/users.model')
 
 
-async function registerController (req, res){
+async function registerController (req, res){   
     const {username,email,password,bio,profileImage} = req.body
 
 //check if user already exist
@@ -65,7 +65,7 @@ async function loginController (req,res) {
         })
     }
 
-    const token = jwt.sign( {email:email,} ,process.env.JWT_SECRET, {expiresIn:'1d'})
+    const token = jwt.sign( { id: user._id } ,process.env.JWT_SECRET, {expiresIn:'1d'})
     res.cookie('token', token)
     res.status(200).json({
         message:"User logged in successfully",
