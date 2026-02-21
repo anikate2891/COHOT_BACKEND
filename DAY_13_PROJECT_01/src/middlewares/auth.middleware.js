@@ -16,5 +16,6 @@ async function identifyUser(req,res,next){
         req.user = decoded
         next()
 }
+// req.user
 
 module.exports = identifyUser;

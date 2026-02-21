@@ -11,8 +11,8 @@ app.use('/api/post', postRouth)
 const authRouter = require('./routes/auth.routh')
 app.use('/api/auth', authRouter)
 
-const followRouter = require('../src/routes/follow.routh')
-app.use('/api/user',followRouter)
+const userRouter = require('../src/routes/user.routh')
+app.use('/api/user', userRouter)
 
 
 module.exports = app;

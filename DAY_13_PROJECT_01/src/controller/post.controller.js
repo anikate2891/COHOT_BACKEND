@@ -66,4 +66,26 @@ async function getpostDetailsController(req,res){
 
 }
 
-module.exports = {createPostController,getpostcontroller,getpostDetailsController}
+const likeModel = require('../models/like.model')
+async function likePostController(){
+    const username = req.user.username
+    const postId = req.params.id
+
+    const post = await postModel.findById(postId);
+    if(!post){
+        return res.status(404).json({message:'post not found'})
+    }
+
+    const like = await likeModel.create({
+        post: postId,
+        user: username
+    })
+
+    res.status(200).json({
+        message: 'Post like Successfully',
+        like
+    })
+
+}
+
+module.exports = {createPostController,getpostcontroller,getpostDetailsController,likePostController}
