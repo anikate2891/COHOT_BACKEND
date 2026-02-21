@@ -9,10 +9,10 @@ const upload = multer({ storage: multer.memoryStorage() })
 
 postRouter.post('/', upload.single('image'),identifyUser,postController.createPostController )
 
-postRouter.get('/',identifyUser, postController.getpostcontroller)
+postRouter.get('/allpost',identifyUser, postController.getpostcontroller)
 
 postRouter.get('/details/:postId', identifyUser ,postController.getpostDetailsController)
 
-postRouter.post('/like/:psotId',identifyUser,postController.likePostController)
+postRouter.post('/like/:postId',identifyUser,postController.likePostController)
 
 module.exports = postRouter

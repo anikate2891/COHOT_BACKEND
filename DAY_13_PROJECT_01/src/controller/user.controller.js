@@ -1,29 +1,30 @@
 const followModel = require('../models/follow.model')
+const userModel = require('../models/users.model')
 
 
 async function followUserController(req,res){
     const followerUserName = req.user.username; // Log in user name
     const followeUserName = req.params.username; //Followee user name
 
-    if(followeUserName === followeUserName){
+    if(followerUserName === followeUserName){
         return res.status(404).json({message:"You can't following himself."})
     }
 
-    const isExistFollowee = await followModel.findOne({
+    const isExistFollowee = await userModel.findOne({
         username:followeUserName
     })
     if(!isExistFollowee){
-        res.status(404).json({
+        return res.status(404).json({
             message: 'User does not exist, please try again'
         })
     }
 
     const IsUserAlreadyFolllowing = await followModel.findOne({
-        follower:followeUserName, followee:followeUserName
+        follower:followerUserName, followee:followeUserName
     })
 
     if(IsUserAlreadyFolllowing){
-        res.status(409).json({
+        return res.status(409).json({
             message:'You already following..',
             follow: IsUserAlreadyFolllowing
         })

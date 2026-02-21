@@ -36,9 +36,6 @@ async function getpostcontroller(req,res){
         posts
     })
 
-
-
-
 } 
 
 
@@ -67,9 +64,9 @@ async function getpostDetailsController(req,res){
 }
 
 const likeModel = require('../models/like.model')
-async function likePostController(){
+async function likePostController(req,res){
     const username = req.user.username
-    const postId = req.params.id
+    const postId = req.params.postId
 
     const post = await postModel.findById(postId);
     if(!post){

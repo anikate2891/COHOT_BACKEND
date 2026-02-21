@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const followSchema = new mongoose.Schema(
     {
-        followers:{
+        follower:{
             type:String,
             required:[true, 'Follower are required.']
         },
@@ -24,7 +24,7 @@ const followSchema = new mongoose.Schema(
         timestamps:true
     }
 )
-followSchema.index({followee:1, followers:1},{unique:true})
+followSchema.index({followee:1, follower:1},{unique:true})
 
 const followModel = new mongoose.model('follows', followSchema)
 module.exports = followModel;
