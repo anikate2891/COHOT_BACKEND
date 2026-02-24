@@ -26,11 +26,13 @@ async function userRegisterController(req,res){
     const token = jwt.sign({id:newUser._id},process.env.JWT_SECRET,{expiresIn:'1d'})
     res.cookie('token',token)
 
-    res.status(200).json({
+    res.status(201).json({
         message:'User Created Successfully',
-        newUser
+        username: newUser.username
     })
 }
+
+
 async function userLoginController(req,res){
     const {username,password} = req.body;
 
@@ -43,17 +45,17 @@ async function userLoginController(req,res){
     }
 
     //Checked password valid or not
-    const hashpassword = await bcrypt.compare(password,newUser.password)
+    const hashpassword = await bcrypt.compare(password,user.password)
     if(!hashpassword){
         return res.status(401).json({
             message:'password invalid'
         })
     }
 
-    const token = jwt.sign({id : user._id},proccess.env.JWT_SECRET,{expiresIn : '1d'});
+    const token = jwt.sign({id : user._id},process.env.JWT_SECRET,{expiresIn : '1d'});
     res.cookie('token',token)
 
-    res.status(200).json({
+    res.status(201).json({
         message:'user logged in Sucessfully',
         user:user.username
     })
