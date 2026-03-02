@@ -2,11 +2,14 @@ import React from 'react'
 import { RouterProvider } from 'react-router'
 import { router } from './app.route'
 import './features/shared/global.scss'
+import { AuthProvider } from './features/auth/auth.Contex'
 
 const App = () => {
   return (
     <>
-      <RouterProvider router={router}/>
+      <AuthProvider>
+        <RouterProvider router={router}/>
+      </AuthProvider>
     </>
   )
 }
