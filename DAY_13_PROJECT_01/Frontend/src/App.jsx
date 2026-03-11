@@ -3,12 +3,15 @@ import { RouterProvider } from 'react-router'
 import { router } from './app.route'
 import './features/shared/global.scss'
 import { AuthProvider } from './features/auth/auth.Contex'
+import { PostProvider } from './features/posts/Post.Context'
 
 const App = () => {
   return (
     <>
       <AuthProvider>
-        <RouterProvider router={router}/>
+        <PostProvider>
+          <RouterProvider router={router}/>
+        </PostProvider>
       </AuthProvider>
     </>
   )

@@ -6,7 +6,7 @@ const authcontroller = require('../controller/auth.controller.js')
 
 authRouth.post('/register', authcontroller.registerController);
 
-authRouth.post('/log-in', authcontroller.loginController)
+authRouth.post('/login', authcontroller.loginController)
 
 authRouth.get('/get-me', identifyUser ,authcontroller.getmeController)
 module.exports = authRouth

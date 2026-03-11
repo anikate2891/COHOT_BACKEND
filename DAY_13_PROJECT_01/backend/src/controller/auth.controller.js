@@ -30,7 +30,12 @@ async function registerController (req, res){
     const token = jwt.sign({id:user._id , username:username}, process.env.JWT_SECRET, 
     {expiresIn:'1d'})
 
-    res.cookie('token', token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
+    })
 
     res.status(201).json({
         message:"user created successfully",
@@ -50,7 +55,7 @@ async function loginController (req,res) {
     
     const user = await userModel.findOne({
         $or:[{username:username},{email:email}]
-    })
+    }).select("+password")
 
     if(!user){
         return res.status(404).json({
@@ -67,7 +72,12 @@ async function loginController (req,res) {
     }
 
     const token = jwt.sign( { id: user._id , username:user.username } ,process.env.JWT_SECRET, {expiresIn:'1d'})
-    res.cookie('token', token)
+    res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "none",
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000
+})
     res.status(200).json({
         message:"User logged in successfully",
         user:{

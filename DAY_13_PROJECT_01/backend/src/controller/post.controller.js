@@ -85,4 +85,12 @@ async function likePostController(req,res){
 
 }
 
-module.exports = {createPostController,getpostcontroller,getpostDetailsController,likePostController}
+async function getMyPostController(req,res){
+    const posts = await postModel.find().populate('user')
+    res.status(200).json({
+        message : 'All Posts is there',
+        posts
+    }) 
+}
+
+module.exports = {createPostController,getpostcontroller,getpostDetailsController,likePostController , getMyPostController}
