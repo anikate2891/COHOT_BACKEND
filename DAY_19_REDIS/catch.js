@@ -12,3 +12,9 @@ redisDatabase.on('connect', () => {
 });
 
 module.exports = redisDatabase;
+
+/* 
+Fetures of Redis:
+    await redis.set(token, Date.now().toString(), 'EX', 60*60) 
+    [key, value, expaireTime, 1h]
+*/
