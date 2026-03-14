@@ -1,0 +1,9 @@
+Server to databse connectiom = MoogoDB;
+Server to ASP (AI Service Provider) connection = LangChain;
+
+npm i readline-sync - to take input from user in terminal
+npm i langchain
+npm i @langchain/mistralai
+
+
+Tools:

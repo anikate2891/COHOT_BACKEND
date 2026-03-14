@@ -1,10 +1,10 @@
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config";
 
 import app from "./src/app.js";
 import connectDB from "./src/config/database.js";
 import { testAi } from "./src/services/ai.services.js";
-
+console.log(process.env.GOOGLE_USER);
+console.log(process.env.GOOGLE_PASSWORD);
 
 const PORT = process.env.PORT || 8000;
 
@@ -12,6 +12,7 @@ testAi();
 
 connectDB()
     .catch((err) => {
+        
         console.error("MongoDB connection failed:", err);
         process.exit(1);
     });

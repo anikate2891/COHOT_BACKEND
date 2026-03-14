@@ -6,6 +6,6 @@ export async function testAi() {
         apiKey: process.env.GOOGLE_API_KEY
     });
 
-    const response = await model.invoke("What is AI explain under 10 words?");
+    const response = await model.invoke("Hii my name is Pocha ");
     console.log(response.text);
 }
