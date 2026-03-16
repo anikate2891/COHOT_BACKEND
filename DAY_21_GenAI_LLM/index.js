@@ -1,7 +1,12 @@
 import 'dotenv/config';
 import readline from "readline/promises";
 import { ChatMistralAI } from "@langchain/mistralai";
-import { HumanMessage } from 'langchain';
+import { HumanMessage, tool } from 'langchain';
+import nodemailer from 'nodemailer';
+import { sendEmail } from './mail.services.js';
+
+
+const emailTool = tool({})
 
 const rl = readline.createInterface({
     input: process.stdin,
