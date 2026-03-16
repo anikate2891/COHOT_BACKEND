@@ -8,7 +8,7 @@ console.log(process.env.GOOGLE_PASSWORD);
 
 const PORT = process.env.PORT || 8000;
 
-testAi();
+
 
 connectDB()
     .catch((err) => {
