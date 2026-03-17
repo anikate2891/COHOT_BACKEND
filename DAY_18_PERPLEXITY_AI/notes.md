@@ -32,3 +32,6 @@
         - role [user, assistant]
         - createdAt
         - updatedAt
+
+
+npm i socketio-client
