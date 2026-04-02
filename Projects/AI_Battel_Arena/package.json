@@ -1,0 +1,25 @@
+{
+  "name": "ai_battel_arena",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@langchain/core": "^1.1.38",
+    "@langchain/google": "^0.1.9",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}
