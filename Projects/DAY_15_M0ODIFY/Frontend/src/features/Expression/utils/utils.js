@@ -50,9 +50,11 @@ export const detect = ({ landmarkerRef, videoRef , setExpression}) => {
           currentExpression = "Happy 😄";
         } else if (jawOpen > 0.1 && browUp > 0.3) {
           currentExpression = "Surprised 😲";
-        } else if (frownLeft > 0.0003 && frownRight > 0.0003) {
+        } else if (browUp < 0.2 && (frownLeft > 0.4 || frownRight > 0.4)) {
+          currentExpression = "Angry 😠";
+        } else if (frownLeft > 0.3 && frownRight > 0.3) {
           currentExpression = "Sad 😢";
-        }
+        } 
 
         setExpression(currentExpression);
       }
