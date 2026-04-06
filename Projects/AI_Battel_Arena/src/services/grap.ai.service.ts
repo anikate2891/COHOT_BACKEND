@@ -1,92 +1,83 @@
-import { StateSchema, MessagesValue, ReducedValue, StateGraph, START, END } from "@langchain/langgraph";
-import type { GraphNode } from "@langchain/langgraph";
-import { HumanMessage } from "@langchain/core/messages";
-import {string, z} from "zod";
-import { createAgent, providerStrategy } from "langchain";
-import { geminiModel, cohereModel, mistralModel } from "./models.service.js";
+import { StateGraph, StateSchema, type GraphNode, START, END } from "@langchain/langgraph";
+import z from "zod";
+import { geminiModel, mistralModel, cohereModel } from "./models.service.js";
+import { createAgent, toolStrategy, providerStrategy, HumanMessage } from "langchain";
 
-// Data ek jaga se dusri jaga transfer karne ke liye use hota hai
-const State = new StateSchema({
-    messages: MessagesValue, //Default
-    solution_1:new ReducedValue(z.string().default(""),{
-        reducer: (current, next) => {
-            return next; // Always take the latest value
-        },
-    }),
-    solution_2:new ReducedValue(z.string().default(""),{
-        reducer: (current, next) => {
-            return next; // Always take the latest value
-        }
-    }),
-    jusdge_recommendation: new ReducedValue(z.object().default({
-        solution_1_score: 0,
-        solution_2_score: 0,
-    }),
-    {
-        reducer: (current, next) => {
-            return next; // Always take the latest value
-        }
-    }),
-});
+const state = new StateSchema({
+    problem: z.string().default(''),
+    solution_1: z.string().default(''),
+    solution_2: z.string().default(''),
+    judge:z.object({
+        solution_1_score: z.number().default(0),
+        solution_2_score: z.number().default(0),
+        solution_1_feedback: z.string().default(''),
+        solution_2_feedback: z.string().default('')
+    })
+})
 
-const solutionNode: GraphNode<typeof State> = async (state:typeof State)=>{
-
-        console.log(state);
-        
-
-    const [mistral_solution, cohere_solution] = await Promise.all([
-        mistralModel.invoke(state.messages[0].text),
-        cohereModel.invoke(state.messages[0].text)
-    ]) // For parallel execution of multiple tasks if needed
+const SolutionNode: GraphNode<typeof state> = async (state) => {
+    const [mistralResponse, cohereResponse] = await Promise.all([
+        mistralModel.invoke(state.problem),
+        cohereModel.invoke(state.problem)
+    ]);
 
     return {
-        solution_1: mistral_solution.text, // Default
-        solution_2: cohere_solution.text // Default
-    }
+        solution_1: mistralResponse.text,
+        solution_2: cohereResponse.text
+    };
 }
 
-const judgeNode: GraphNode<typeof State> = async (state:typeof State)=>{
+const JudgeNode: GraphNode<typeof state> = async (state) => {
+    const {problem, solution_1, solution_2} = state;
 
-    const { solution_1, solution_2 } = state;
-    const judge = createAgent({
-        model:geminiModel,
-        tools:[],
-        responseFormat: providerStrategy(z.object({
+    const judgeAgent = createAgent({
+        model: geminiModel,
+        responseFormat:providerStrategy(z.object({
             solution_1_score: z.number().min(0).max(10),
             solution_2_score: z.number().min(0).max(10),
-        }))
-    })
+            solution_1_feedback: z.string(),
+            solution_2_feedback: z.string()
+        })),
+            systemPrompt:`You are an expert judge tasked with evaluating two solutions to a given problem. Please provide a score between 0 and 10 for each solution, along with detailed feedback explaining the reasoning behind the scores. Consider factors such as correctness, efficiency, creativity, and clarity in your evaluation.`
+        })
 
-    const judge_recommendation = await judge.invoke({
+    const judgeResponse = await judgeAgent.invoke({
         messages:[
             new HumanMessage(
-            `You are a judge tasked with evaluating two solutions to a problem.The problem is ${state.messages[0].text},This is 1st solution: ${solution_1}. This is 2nd solution: ${solution_2}. Please provide a score for each solution on a scale of 0 to 10, where 0 indicates a poor solution and 10 indicates an excellent solution.`
+                `
+                Problem: ${problem}
+                Solution 1: ${solution_1}
+                Solution 2: ${solution_2}
+                Please evaluate the two solutions and provide your scores and feedback.
+                `
             )
         ]
-    });
+    })
 
-    const result = judge_recommendation.structuredResponse;
+    const {
+        solution_1_score, 
+        solution_2_score, 
+        solution_1_feedback, 
+        solution_2_feedback
+        } = judgeResponse.structuredResponse;
 
     return {
-        jusdge_recommendation: result
-    }
-}
+        judge: { solution_1_score, solution_2_score, solution_1_feedback, solution_2_feedback }
+    };
+}   
 
-const graph = new StateGraph(State)
-    .addNode('solution', solutionNode)
-    .addNode('judge', judgeNode)
-    .addEdge(START, 'solution')
-    .addEdge('solution', 'judge')
-    .addEdge('solution', END)
+// Graph definition
+const graph = new StateGraph(state)
+    .addNode("solution", SolutionNode)
+    .addNode("judge_node", JudgeNode)
+
+    .addEdge(START, "solution")
+    .addEdge("solution", "judge_node")
+    .addEdge("judge_node", END)
     .compile();
 
-export default async function (Usermessages:string){
-    const result = await graph.invoke({
-        messages:[
-            new HumanMessage(Usermessages)
-        ]
-    })
-    console.log(result);
-    
-    return result.messages;
+//runGraph function.
+export default async function (problem: string) {
+    const result = await graph.invoke({ problem: problem });
+    return result;
 }
