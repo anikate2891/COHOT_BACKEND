@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CinematicChat - Solution Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#c4c7c9",
+                        "surface-container-highest": "#0a2257",
+                        "secondary-container": "#2d3c51",
+                        "surface": "#070d1f",
+                        "surface-container-low": "#09122b",
+                        "tertiary": "#ebf1ff",
+                        "on-secondary-fixed": "#314055",
+                        "background": "#070d1f",
+                        "inverse-primary": "#5c5f61",
+                        "on-surface": "#dfe4ff",
+                        "surface-container-high": "#0b1d48",
+                        "tertiary-dim": "#c7d5ee",
+                        "secondary": "#8f9fb7",
+                        "on-error-container": "#ff9993",
+                        "primary-container": "#444749",
+                        "tertiary-fixed": "#d5e3fd",
+                        "error-container": "#7f2927",
+                        "on-error": "#490106",
+                        "on-primary": "#3d4142",
+                        "surface-dim": "#070d1f",
+                        "outline-variant": "#32457c",
+                        "on-primary-container": "#ced1d2",
+                        "on-tertiary-fixed-variant": "#4e5c71",
+                        "primary-fixed-dim": "#d2d5d7",
+                        "surface-tint": "#c4c7c9",
+                        "inverse-on-surface": "#4f5469",
+                        "surface-bright": "#082768",
+                        "on-tertiary": "#4d5b70",
+                        "surface-container-lowest": "#000000",
+                        "on-surface-variant": "#96a9e6",
+                        "on-primary-fixed": "#3c4042",
+                        "on-tertiary-fixed": "#324054",
+                        "on-secondary": "#102134",
+                        "primary-fixed": "#e0e3e5",
+                        "surface-variant": "#0a2257",
+                        "secondary-fixed-dim": "#c5d6f0",
+                        "inverse-surface": "#faf8ff",
+                        "secondary-dim": "#8f9fb7",
+                        "on-secondary-container": "#b0c0da",
+                        "surface-container": "#0a1839",
+                        "primary-dim": "#b6b9bb",
+                        "tertiary-fixed-dim": "#c7d5ee",
+                        "on-tertiary-container": "#455367",
+                        "error": "#ee7d77",
+                        "secondary-fixed": "#d3e4fe",
+                        "outline": "#6073ad",
+                        "on-primary-fixed-variant": "#595c5e",
+                        "error-dim": "#bb5551",
+                        "on-secondary-fixed-variant": "#4d5d73",
+                        "tertiary-container": "#d5e3fd",
+                        "on-background": "#dfe4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #32457c26; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #32457c4d; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-white">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 px-10 flex justify-between items-center bg-[#070d1f] dark:bg-[#070d1f] h-16 tonal-shift bg-surface-container-low flat no shadows">
+<div class="text-2xl font-bold tracking-tighter text-[#dfe4ff]">CinematicChat</div>
+<div class="flex items-center gap-12">
+<div class="flex gap-8">
+<a class="font-manrope tracking-tighter font-bold uppercase text-xs text-[#dfe4ff] border-b-2 border-[#c4c7c9] pb-1 cursor-pointer active:scale-95 transition-colors duration-300" href="#">Threads</a>
+<a class="font-manrope tracking-tighter font-bold uppercase text-xs text-[#96a9e6] opacity-60 hover:text-[#dfe4ff] cursor-pointer active:scale-95 transition-colors duration-300" href="#">Archive</a>
+<a class="font-manrope tracking-tighter font-bold uppercase text-xs text-[#96a9e6] opacity-60 hover:text-[#dfe4ff] cursor-pointer active:scale-95 transition-colors duration-300" href="#">Settings</a>
+</div>
+<div class="flex items-center gap-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-all">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-all">history</span>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant/20" data-alt="Close-up portrait of a professional user in cinematic soft lighting with dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-dQvSwK0KBEVaQP3n1LOuUHN7fE3yjXWk7WnWoi2t7BinuP5hLahjl4W-QXJoHDGhaqmJbclAH3AQTwx9zgAVVQPtXa_Vi5hn9he5ewRCyj4RO9TKmLVgZChpyQmXQiivaLZoUwfxlCJy6RVKONls7Kp2WpJpvLA_h91aMODL_h--gTZx-CS1CCHhTVFM0NDS0uWhv23b-xXM0NzBOIzK1SlYSBTMeaOy-j3FrGZay87EoTD0cu9G5dtLzLTqFciXU5yDfuPFIi8"/>
+</div>
+</div>
+</nav>
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-20 pb-8 h-screen w-64 border-r border-[#32457c]/15 bg-[#070d1f] dark:bg-[#070d1f] font-manrope uppercase tracking-widest text-[10px] negative-space with ghost-border-fallback flat">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 bg-surface-container-high rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">rocket_launch</span>
+</div>
+<div>
+<div class="text-on-surface font-bold">Workspace</div>
+<div class="text-on-surface-variant opacity-60 text-[8px]">Creative Engine</div>
+</div>
+</div>
+<button class="w-full mt-4 bg-primary text-on-primary py-3 rounded-md font-bold tracking-widest hover:brightness-110 transition-all active:scale-[0.98]">
+                New Interaction
+            </button>
+</div>
+<nav class="flex-1 flex flex-col px-4 gap-1">
+<div class="flex items-center gap-3 px-4 py-3 text-[#96a9e6] opacity-70 hover:bg-[#32457c]/5 hover:text-[#dfe4ff] cursor-pointer transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined text-sm">chat_bubble</span>
+<span>Direct Messages</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#dfe4ff] font-bold bg-[#32457c]/10 rounded-r-full cursor-pointer transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined text-sm">group</span>
+<span>Group Chats</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#96a9e6] opacity-70 hover:bg-[#32457c]/5 hover:text-[#dfe4ff] cursor-pointer transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined text-sm">psychology</span>
+<span>Solvers</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#96a9e6] opacity-70 hover:bg-[#32457c]/5 hover:text-[#dfe4ff] cursor-pointer transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+<span>Drafts</span>
+</div>
+</nav>
+<div class="mt-auto px-4 flex flex-col gap-1 border-t border-outline-variant/10 pt-4">
+<div class="flex items-center gap-3 px-4 py-2 text-[#96a9e6] opacity-70 hover:text-[#dfe4ff] cursor-pointer">
+<span class="material-symbols-outlined text-sm">help</span>
+<span>Help</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-[#96a9e6] opacity-70 hover:text-[#dfe4ff] cursor-pointer">
+<span class="material-symbols-outlined text-sm">shield</span>
+<span>Privacy</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 pb-40 min-h-screen">
+<div class="max-w-6xl mx-auto px-12 pt-16">
+<!-- Feed Interaction 1 -->
+<section class="mb-24">
+<div class="mb-12">
+<span class="label text-[10px] tracking-widest text-on-surface-variant opacity-60 uppercase font-bold block mb-2">Current Challenge</span>
+<h1 class="text-4xl font-extrabold tracking-tighter text-on-surface leading-tight max-w-3xl">
+                        Design a scalable microservices architecture for a real-time global betting platform that handles 1M+ concurrent users.
+                    </h1>
+</div>
+<!-- Solution Side-by-Side -->
+<div class="grid grid-cols-2 gap-8 mb-8">
+<!-- Solution 1 -->
+<div class="bg-surface-container-low p-10 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors"></div>
+<div class="flex justify-between items-start mb-6">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Solution 01</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-40">code</span>
+</div>
+<div class="font-mono text-sm text-[#96a9e6] bg-black/30 p-6 rounded-lg leading-relaxed border border-outline-variant/10">
+<span class="text-primary-dim">// Distributed Ledger Architecture</span><br/>
+<span class="text-secondary">const</span> cluster = <span class="text-tertiary">new</span> ServiceMesh({<br/>
+                              orchestrator: <span class="text-on-surface">"kubernetes"</span>,<br/>
+                              scaling: <span class="text-on-surface">"horizontal"</span>,<br/>
+                              shards: <span class="text-on-surface">128</span><br/>
+                            });<br/><br/>
+<span class="text-primary-dim">// Real-time Sync</span><br/>
+                            cluster.attach(RedisStream.global());
+                        </div>
+</div>
+<!-- Solution 2 -->
+<div class="bg-surface-container-low p-10 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors"></div>
+<div class="flex justify-between items-start mb-6">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Solution 02</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-40">terminal</span>
+</div>
+<div class="font-mono text-sm text-[#96a9e6] bg-black/30 p-6 rounded-lg leading-relaxed border border-outline-variant/10">
+<span class="text-primary-dim"># Event-Driven Pipeline</span><br/>
+                            services:<br/>
+                              gateway:<br/>
+                                image: envoy:latest<br/>
+                                ports: [8080]<br/>
+                              kafka:<br/>
+                                replication: 3<br/>
+                              consumers:<br/>
+                                replicas: 50
+                        </div>
+</div>
+</div>
+<!-- Judge Recommendation Section -->
+<div class="bg-surface-container-high rounded-xl p-10 border border-outline-variant/10">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<h2 class="text-xl font-bold tracking-tight uppercase">Judge Recommendation</h2>
+</div>
+<div class="flex gap-16 items-start">
+<!-- Score 1 -->
+<div class="flex-1">
+<div class="flex items-end gap-3 mb-4">
+<span class="text-5xl font-extrabold tracking-tighter">8.4</span>
+<span class="text-sm font-bold opacity-40 pb-2">/ 10.0</span>
+</div>
+<div class="text-sm text-on-surface-variant leading-relaxed mb-4">
+                                Solution 01 offers superior horizontal scaling capabilities. The ServiceMesh implementation ensures low latency, though the shard overhead might increase operational costs.
+                            </div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold uppercase tracking-widest border border-outline-variant/20">Scalable</span>
+<span class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold uppercase tracking-widest border border-outline-variant/20">Costly</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="w-px h-32 bg-outline-variant/20"></div>
+<!-- Score 2 -->
+<div class="flex-1">
+<div class="flex items-end gap-3 mb-4">
+<span class="text-5xl font-extrabold tracking-tighter text-primary">9.2</span>
+<span class="text-sm font-bold opacity-40 pb-2">/ 10.0</span>
+</div>
+<div class="text-sm text-on-surface-variant leading-relaxed mb-4">
+                                Recommended choice. The event-driven Kafka pipeline is the industry standard for this volume. Replication strategy provides the necessary fault tolerance for financial transactions.
+                            </div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full text-[10px] font-bold uppercase tracking-widest">Recommended</span>
+<span class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold uppercase tracking-widest border border-outline-variant/20">Standard</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interaction 2 (Content Spotlight) -->
+<section class="mb-24 opacity-60">
+<div class="mb-12">
+<span class="label text-[10px] tracking-widest text-on-surface-variant uppercase font-bold block mb-2">Previous Discussion</span>
+<h1 class="text-3xl font-bold tracking-tight text-on-surface-variant leading-tight max-w-2xl">
+                        Optimize a large language model inference engine for sub-100ms latency on edge devices.
+                    </h1>
+</div>
+<!-- Mini view for older content -->
+<div class="bg-surface-container-low/50 border border-outline-variant/5 p-8 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface" data-alt="Portrait of a young tech professional in moody studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUft08IEroIzKRkZGOXoUqy_e6hmT_k3v99DXupRcc7dlDgq9-QWd_Ihr4P1ZXkiKhbO1CNklngyCk0N66-9ah2S_6U3JPj77pwBzvzrfUSe9E6cPG9Q6FoSEifRq7F0NqdGfGzJe_Oz7kcpygI2yqu3ZUxPT97BnH6KZiBVhGwj-t2gtcpvAR3wZQxHkTJWIgTF6RMa1l68TK6O7Ug3bvu0f0wmyRq9VhyqIC5Ugg-oW85Gyb57Oomd8XJ7cu5I-mU9xvYzjgu98"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface" data-alt="Close-up of an AI specialist with glasses against a neon city backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHlLlSJu9IcazsDuWKpCY1StJ_UvlsFSviaP3o_c5-CyZpBlZVPXoc_AwSnNrvUBkpcA_q07hSFwgzp12cOX2CE6FwGGkdh1aPUuDTZeVTaE1MvURE_zse8Gdh2BofaKub2hwmnuF3vBjESywksUrwsxeN4VzCJJpLhC3d-cOQmTnPjFDXWKQy1Mn6Qyt-TdpQGD2wz8lIfg7lO4AZC33iWOibpDy30nIhVBnGRoFzQO9HNODG2WBTo5LUjbApdAT9fnqRZGuskpQ"/>
+</div>
+<p class="text-sm font-medium italic">"The Quantization method outperformed the Distillation strategy in edge benchmarks..."</p>
+</div>
+<button class="text-xs font-bold uppercase tracking-widest text-primary hover:underline underline-offset-4">Revisit Debate</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Fixed Bottom Input Area -->
+<div class="fixed bottom-0 left-64 right-0 z-40 bg-surface/80 backdrop-blur-xl border-t border-outline-variant/10">
+<div class="max-w-4xl mx-auto py-10 px-8">
+<div class="relative flex items-center group">
+<textarea class="w-full bg-surface-container-highest/40 border-0 rounded-xl px-8 py-5 pr-24 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-1 focus:ring-primary/30 transition-all resize-none font-medium text-lg leading-relaxed" placeholder="Describe your architectural problem..." rows="1"></textarea>
+<div class="absolute right-4 flex items-center gap-3">
+<button class="p-3 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">attachment</span>
+</button>
+<button class="bg-primary text-on-primary p-3 rounded-lg shadow-xl shadow-primary/10 hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex justify-center gap-6">
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                    Dual Engine Solver Active
+                </span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">history_edu</span>
+                    Journaling Session 14
+                </span>
+</div>
+</div>
+</div>
+</body></html>
