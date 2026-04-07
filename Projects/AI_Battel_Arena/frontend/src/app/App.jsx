@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 const App = () => {
+  const [theme, setTheme] = useState('light')
   const [activeMenu, setActiveMenu] = useState('new-chat')
   const [isMenuOpen, setIsMenuOpen] = useState(true)
   const [problem, setProblem] = useState('')
@@ -103,7 +104,7 @@ const App = () => {
   }
 
   return (
-    <div className="arena-page">
+    <div className={`arena-page theme-${theme}`}>
       <div className={`arena-shell ${isMenuOpen ? 'menu-open' : 'menu-closed'}`}>
         <aside className={`menu-sidebar ${isMenuOpen ? 'open' : 'closed'}`}>
           <div className="menu-head">
@@ -137,6 +138,15 @@ const App = () => {
         </aside>
 
         <main className="chat-main">
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={() => setTheme((previousTheme) => (previousTheme === 'light' ? 'dark' : 'light'))}
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? 'Dark Theme' : 'Light Theme'}
+          </button>
+
           {!isMenuOpen ? (
             <button
               type="button"
@@ -235,7 +245,7 @@ const App = () => {
           {error ? <p className="error-banner">{error}</p> : null}
 
           <form className="prompt-form" onSubmit={sendMessage}>
-            <label htmlFor="problem-input">Your Problem</label>
+            <label htmlFor="problem-input">Your Problem Reviewed by Two Specialists</label>
             <textarea
               id="problem-input"
               value={problem}
