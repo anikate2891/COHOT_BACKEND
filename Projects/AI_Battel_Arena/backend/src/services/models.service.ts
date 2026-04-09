@@ -7,14 +7,17 @@ import configs from "../config/config.js";
 export const geminiModel = new ChatGoogle({
     model: "gemini-flash-latest",
     apiKey: configs.GOOGLE_API_KEY,
+    streaming: true,
 });
 
 export const mistralModel = new ChatMistralAI({
     model: "mistral-medium-latest",
     apiKey: configs.MISTRAL_API_KEY,
+    streaming: true,
 });
 
 export const cohereModel = new ChatCohere({
     model: "command-a-03-2025",
     apiKey: configs.COHERE_API_KEY,
+    streaming: true,
 }); 
