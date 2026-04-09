@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 
 const Welcome = () => {
+ 
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#f5efe2] via-[#efe5d5] to-[#f8f0e2] px-4 py-10">
       <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 animate-[pulse_6s_ease-in-out_infinite] rounded-full bg-[#c4512d]/20 blur-3xl" />
