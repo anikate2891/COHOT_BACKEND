@@ -127,9 +127,11 @@ useEffect(() => {
               key={item.id}
               className={`menu-item ${activeMenu === item.id ? "active" : ""}`}
               onClick={() => {
-                setActiveMenu(item.id);
-                if (item.id === "new-chat") {
-                  startNewChat();
+                if (item.id === "history") {
+                  setActiveMenu(prev => prev === "history" ? "" : "history");
+                } else {
+                  setActiveMenu(item.id);
+                  if (item.id === "new-chat") startNewChat();
                 }
               }}
             >
@@ -139,8 +141,7 @@ useEffect(() => {
                 </nav>
 
 {/* 👇 History list */}
-          {activeMenu === "history" && (
-            <div className="history-list">
+            <div className={`history-list ${activeMenu === "history" ? "open" : ""}`}>
               {history.map(chat => (
                 <button
                   key={chat.id}
@@ -151,7 +152,7 @@ useEffect(() => {
                 </button>
               ))}
             </div>
-          )}
+          
           <div className="menu-footer">
             <button
               

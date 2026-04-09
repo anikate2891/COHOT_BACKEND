@@ -132,6 +132,18 @@ body {
 	min-height: 100vh;
 }
 
+.history-list {
+	max-height: 0;
+	overflow: hidden;
+	transition: all 0.3s ease;
+	margin-top: 0;
+}
+
+.history-list.open {
+	max-height: 300px;
+	margin-top: 10px; /* 👈 gap */
+}
+
 .arena-page {
 	min-height: 100vh;
 	padding: 0;
