@@ -6,6 +6,10 @@
 	--ink: #221e1a;
 	--title-ink: #221e1a;
 	--label-ink: #2b2620;
+	--you-label-ink: #b13f1f;
+	--you-text-ink: #2a221a;
+	--judge-label-ink: #a13a1d;
+	--judge-text-ink: #3a3027;
 	--muted: #6f6458;
 	--card: #fffaf1;
 	--line: #d9ccb7;
@@ -61,6 +65,10 @@
 	--ink: #f1f3f7;
 	--title-ink: #f8fbff;
 	--label-ink: #e6edf8;
+	--you-label-ink: #ffb38a;
+	--you-text-ink: #eef5ff;	
+	--judge-label-ink: #ffbf9f;
+	--judge-text-ink: #d7ecff;
 	--muted: #a6b0bf;
 	--card: #10141b;
 	--line: #242d39;
@@ -438,6 +446,10 @@ h1 {
 	color: var(--muted);
 }
 
+.chat-bubble.user .chat-label {
+	color: var(--you-label-ink);
+}
+
 .empty-state {
 	border: 1px dashed var(--line);
 	border-radius: 14px;
@@ -462,9 +474,14 @@ h1 {
 	font-weight: 700;
 }
 
+.judge-recommendation .card-label {
+	color: var(--judge-label-ink);
+}
+
 .problem-text {
 	margin: 8px 0 0;
 	font-weight: 600;
+	color: var(--you-text-ink);
 }
 
 .solutions-grid {
@@ -576,6 +593,7 @@ h1 {
 
 .judge-recommendation p {
 	margin: 4px 0 0;
+	color: var(--judge-text-ink);
 }
 
 @media (max-width: 860px) {

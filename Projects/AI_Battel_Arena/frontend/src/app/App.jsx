@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import axios from 'axios'
+
 
 const App = () => {
   const [theme, setTheme] = useState('light')
@@ -61,19 +63,9 @@ const App = () => {
     setProblem('')
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ problem: trimmedProblem }),
+      const { data } = await axios.post('/api/chat', {
+        problem: trimmedProblem,
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data?.message || 'Failed to fetch AI response.')
-      }
 
       setMessages((previousMessages) =>
         previousMessages.map((message) =>
@@ -97,11 +89,17 @@ const App = () => {
             : message,
         ),
       )
-      setError(err instanceof Error ? err.message : 'Unexpected error occurred.')
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || err.message || 'Failed to fetch AI response.')
+      } else {
+        setError(err instanceof Error ? err.message : 'Unexpected error occurred.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
+
+
 
   return (
     <div className={`arena-page theme-${theme}`}>

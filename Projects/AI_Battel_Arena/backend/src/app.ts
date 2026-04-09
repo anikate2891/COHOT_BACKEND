@@ -1,8 +1,18 @@
 import express from 'express';
+import cors from 'cors';
 import runGraph from './services/grap.ai.service.js';
+
 const app = express();
+const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 // Basic Server Setup
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+}));
 app.use(express.json());
 
 app.get('/', async(req, res) => {
