@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -57,48 +56,89 @@ const Hero = () => {
 
         const pendingId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
         const userMessage = {
-        id: pendingId,
-        problem: trimmedProblem,
-        status: 'pending',
-        response: null,
+            id: pendingId,
+            problem: trimmedProblem,
+            status: 'pending',
+            response: {
+                solution_1: "",
+                solution_2: "",
+                judge: {}
+            },
         }
 
         setMessages((previousMessages) => [...previousMessages, userMessage])
         setProblem('')
 
-        try {
-        const { data } = await axios.post('/api/chat', {
-            problem: trimmedProblem,
-        })
+    try {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ problem: trimmedProblem }),
+  });
 
-        setMessages((previousMessages) =>
-            previousMessages.map((message) =>
-            message.id === pendingId
-                ? {
-                    ...message,
-                    status: 'done',
-                    response: data,
-                }
-                : message,
-            ),
-        )
-        } catch (err) {
-        setMessages((previousMessages) =>
-            previousMessages.map((message) =>
-            message.id === pendingId
-                ? {
-                    ...message,
-                    status: 'error',
-                }
-                : message,
-            ),
-        )
-        if (axios.isAxiosError(err)) {
-            setError(err.response?.data?.message || err.message || 'Failed to fetch AI response.')
-        } else {
-            setError(err instanceof Error ? err.message : 'Unexpected error occurred.')
-        }
-        } finally {
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value);
+    const lines = chunk.split("\n").filter(Boolean);
+
+    for (const line of lines) {
+      const data = JSON.parse(line);
+
+      setMessages(prev =>
+        prev.map(msg => {
+          if (msg.id !== pendingId) return msg;
+
+          if (data.model === "mistral") {
+            return {
+              ...msg,
+              response: {
+                ...msg.response,
+                solution_1: (msg.response?.solution_1 || "") + data.content
+              }
+            };
+          }
+
+          if (data.model === "cohere") {
+            return {
+              ...msg,
+              response: {
+                ...msg.response,
+                solution_2: (msg.response?.solution_2 || "") + data.content
+              }
+            };
+          }
+
+          if (data.type === "judge") {
+            return {
+              ...msg,
+              status: "done",
+              response: {
+                ...msg.response,
+                judge: data.data
+              }
+            };
+          }
+
+          return msg;
+        })
+      );
+    }
+  }
+
+} catch (err) {
+  setError(err.message || "Streaming failed");
+} finally {
         setIsLoading(false)
         }
     }
