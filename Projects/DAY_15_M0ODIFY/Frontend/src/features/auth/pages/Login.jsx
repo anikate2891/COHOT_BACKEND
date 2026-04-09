@@ -26,7 +26,7 @@ const Login = () => {
         <h1>Login</h1>
         <form onSubmit={handleSubmit}>
           <FormGroup
-           value={email}
+          value={email}
             onChange={(e) => setEmail(e.target.value)}
           label="Username" placeholder="Enter your username" />
           <FormGroup 
