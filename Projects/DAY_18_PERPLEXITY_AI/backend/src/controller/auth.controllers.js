@@ -34,14 +34,27 @@ export async function register(req, res) {
     await sendEmail({
         to: email,
         subject: "Welcome to Perplexity!",
-        html: `
-                <p>Hi ${username},</p>
-                <p>Thank you for registering at <strong>Perplexity</strong>. We're excited to have you on board!</p>
-                <p>Please verify your email address by clicking the link below:</p>
-                <a href="http://localhost:3000/api/auth/verify-email?token=${emailVerificationToken}">Verify Email</a>
-                <p>If you did not create an account, please ignore this email.</p>
-                <p>Best regards,<br>The Perplexity Team</p>
-        `
+    html: `
+    <p>Hi <strong>${username}</strong>,</p>
+
+    <p>Welcome to <strong>Perplexity</strong>! 🎉</p>
+
+    <p>Thanks for signing up. Please verify your email address by clicking the button below:</p>
+
+    <p>
+        <a href="http://localhost:3000/api/auth/verify-email?token=${emailVerificationToken}">
+            ✅ Verify My Email
+        </a>
+    </p>
+
+    <p>This link will verify your account and you'll be ready to go!</p>
+
+    <p>If you didn't create this account, you can safely ignore this email.</p>
+
+    <br/>
+    <p>Regards,<br/>
+    <strong>The Perplexity Team</strong></p>
+`
     })
 
     res.status(201).json({
@@ -169,12 +182,90 @@ export async function verifyEmail(req, res) {
 
         await user.save();
 
-        const html =
-            `
-        <h1>Email Verified Successfully!</h1>
-        <p>Your email has been verified. You can now log in to your account.</p>
-        <a href="http://localhost:3000/login">Go to Login</a>
-    `
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Email Verified</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background-color: #09090b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            color: #f4f4f5;
+            padding: 20px;
+        }
+
+        .card {
+            background: #18181b;
+            border: 1px solid rgba(49, 184, 198, 0.3);
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .icon {
+            width: 72px;
+            height: 72px;
+            background: rgba(49, 184, 198, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #31b8c6;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 15px;
+            color: #a1a1aa;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        a {
+            display: inline-block;
+            background: #31b8c6;
+            color: #09090b;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        a:hover { background: #45c7d4; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="icon">✅</div>
+                <h1>Email Verified!</h1>
+                <p>Your email has been verified successfully.<br/>You can now log in to your account.</p>
+                <a href="http://localhost:5173/login">Go to Login</a>
+            </div>
+        </body>
+        </html>
+`
+return res.send(html);
 
         return res.send(html);
     } catch (err) {
