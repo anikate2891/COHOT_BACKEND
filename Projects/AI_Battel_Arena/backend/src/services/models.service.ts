@@ -1,13 +1,11 @@
-import {ChatGoogle} from "@langchain/google";
 import {ChatMistralAI} from "@langchain/mistralai";
 import {ChatCohere} from "@langchain/cohere";
 import configs from "../config/config.js";
+import Groq from "groq-sdk";
 
 // Judge model
-export const geminiModel = new ChatGoogle({
-    model: "gemini-2.0-flash",
-    apiKey: configs.GOOGLE_API_KEY,
-    streaming: false,
+export const groqClient = new Groq({
+    apiKey: process.env.GROQ_API_KEY
 });
 
 export const mistralModel = new ChatMistralAI({

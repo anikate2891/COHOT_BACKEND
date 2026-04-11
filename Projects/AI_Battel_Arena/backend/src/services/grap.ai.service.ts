@@ -1,8 +1,6 @@
 import type { Request, Response } from "express";
-import { mistralModel, cohereModel, geminiModel } from "./models.service.js";
-import { createAgent, providerStrategy, HumanMessage } from "langchain";
+import { mistralModel, cohereModel, groqClient } from "./models.service.js";
 import chatModel from "../models/chatModel.js";
-import z from "zod";
 
 export default async function (req: Request, res: Response) {
     const { problem } = req.body;
@@ -32,25 +30,16 @@ export default async function (req: Request, res: Response) {
         streamToRes(mistralStream, "mistral", (t) => solution1 += t),
         streamToRes(cohereStream, "cohere", (t) => solution2 += t)
     ]);
-console.log("BEFORE JUDGE");
-   
-  const judgeAgent = createAgent({
-    model: geminiModel,
-    responseFormat: providerStrategy(z.object({
-        solution_1_score: z.number(),
-        solution_2_score: z.number(),
-        solution_1_feedback: z.string(),
-        solution_2_feedback: z.string()
-    }))
-});
 
 let judgeData = null;
 
 try {
-    const judgeResponse = await judgeAgent.invoke({
-        messages: [
-            new HumanMessage(`
-                You are a strict evaluator. 
+    const judgeResponse = await groqClient.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [{
+            role: "user",
+            content: `
+                You are a strict evaluator.
                 Problem: ${problem}
                 Solution 1 (Mistral): ${solution1}
                 Solution 2 (Cohere): ${solution2}
@@ -58,13 +47,13 @@ try {
                 Score both solutions from 1-10 and give feedback.
                 Return ONLY valid JSON with keys:
                 solution_1_score, solution_2_score, solution_1_feedback, solution_2_feedback
-            `)
-        ]
+            `
+        }],
+        response_format: { type: "json_object" }  // ✅ direct JSON milega
     });
 
-    // ✅ Structured output seedha nikalo
-    judgeData = (judgeResponse as any).structuredOutput ?? (judgeResponse as any).output ?? judgeResponse;
-    
+    judgeData = JSON.parse(judgeResponse.choices[0]?.message.content ?? "{}");
+
     console.log("Judge Data:", judgeData);
 
     res.write(JSON.stringify({
@@ -74,8 +63,6 @@ try {
 
 } catch (err) {
     console.log("JUDGE ERROR:", err);
-    
-    // ✅ Fallback bhejo taaki frontend hang na kare
     res.write(JSON.stringify({
         type: "judge",
         data: {
