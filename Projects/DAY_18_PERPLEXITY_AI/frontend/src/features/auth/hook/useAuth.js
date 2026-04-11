@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { register, login, getMe } from "../service/auth.api";
+import { register, login, getMe, logout } from "../service/auth.api";
 import { setUser, setLoading, setError } from "../auth.slice";
 import toast from 'react-hot-toast'
 
@@ -50,10 +50,22 @@ export function useAuth() {
         }
     }
 
+    async function handleLogout() {
+        try {
+            await logout()
+        } catch (err) {
+            // Keep UI logged out even if request fails (e.g. expired cookie).
+            console.error(err)
+        } finally {
+            dispatch(setUser(null))
+        }
+    }
+
     return {
         handleRegister,
         handleLogin,
         handleGetMe,
+        handleLogout,
     }
 
 }

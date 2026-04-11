@@ -276,3 +276,21 @@ return res.send(html);
         })
     }
 }
+
+/**
+ * @desc Logout user and clear auth cookie
+ * @route POST /api/auth/logout
+ * @access Private/Public (safe to call either way)
+ */
+export async function logout(req, res) {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax"
+    })
+
+    res.status(200).json({
+        message: "Logout successful",
+        success: true
+    })
+}
