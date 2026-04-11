@@ -34,44 +34,58 @@ export default async function (req: Request, res: Response) {
     ]);
 console.log("BEFORE JUDGE");
    
-    const judgeAgent = createAgent({
-        model: geminiModel,
-        // responseFormat: providerStrategy(z.object({
-        //     solution_1_score: z.number(),
-        //     solution_2_score: z.number(),
-        //     solution_1_feedback: z.string(),
-        //     solution_2_feedback: z.string()
-        // }))
-    });
+  const judgeAgent = createAgent({
+    model: geminiModel,
+    responseFormat: providerStrategy(z.object({
+        solution_1_score: z.number(),
+        solution_2_score: z.number(),
+        solution_1_feedback: z.string(),
+        solution_2_feedback: z.string()
+    }))
+});
 
-   let judgeData = null;
+let judgeData = null;
 
 try {
     const judgeResponse = await judgeAgent.invoke({
         messages: [
-      new HumanMessage(`
-            Problem: ${problem}
-            Solution 1: ${solution1}
-            Solution 2: ${solution2}
-            Evaluate both.
+            new HumanMessage(`
+                You are a strict evaluator. 
+                Problem: ${problem}
+                Solution 1 (Mistral): ${solution1}
+                Solution 2 (Cohere): ${solution2}
+                
+                Score both solutions from 1-10 and give feedback.
+                Return ONLY valid JSON with keys:
+                solution_1_score, solution_2_score, solution_1_feedback, solution_2_feedback
             `)
-    ]
-  });
-  console.log("FULL:", judgeResponse);
-  judgeData = judgeResponse;
-  console.log(judgeData);
-  
+        ]
+    });
 
-  res.write(JSON.stringify({
-    type: "judge",
-    data: judgeData
-  }) + "\n");
+    // ✅ Structured output seedha nikalo
+    judgeData = (judgeResponse as any).structuredOutput ?? (judgeResponse as any).output ?? judgeResponse;
+    
+    console.log("Judge Data:", judgeData);
+
+    res.write(JSON.stringify({
+        type: "judge",
+        data: judgeData
+    }) + "\n");
 
 } catch (err) {
     console.log("JUDGE ERROR:", err);
-  judgeData = {};
+    
+    // ✅ Fallback bhejo taaki frontend hang na kare
+    res.write(JSON.stringify({
+        type: "judge",
+        data: {
+            solution_1_score: 0,
+            solution_2_score: 0,
+            solution_1_feedback: "Judge unavailable",
+            solution_2_feedback: "Judge unavailable"
+        }
+    }) + "\n");
 }
-console.log("AFTER JUDGE");
     const userId = (req as any).user.userId;
 
     await chatModel.create({

@@ -5,9 +5,9 @@ import configs from "../config/config.js";
 
 // Judge model
 export const geminiModel = new ChatGoogle({
-    model: "gemini-flash-latest",
+    model: "gemini-2.0-flash",
     apiKey: configs.GOOGLE_API_KEY,
-    streaming: true,
+    streaming: false,
 });
 
 export const mistralModel = new ChatMistralAI({
