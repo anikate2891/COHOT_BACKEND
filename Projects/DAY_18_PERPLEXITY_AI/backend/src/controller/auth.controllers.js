@@ -33,11 +33,11 @@ export async function register(req, res) {
 
     await sendEmail({
         to: email,
-        subject: "Welcome to Perplexity!",
+        subject: "Welcome to NexChat!",
     html: `
     <p>Hi <strong>${username}</strong>,</p>
 
-    <p>Welcome to <strong>Perplexity</strong>! 🎉</p>
+    <p>Welcome to <strong>NexChat</strong>! 🎉</p>
 
     <p>Thanks for signing up. Please verify your email address by clicking the button below:</p>
 
@@ -53,7 +53,7 @@ export async function register(req, res) {
 
     <br/>
     <p>Regards,<br/>
-    <strong>The Perplexity Team</strong></p>
+    <strong>The NexChat Team</strong></p>
 `
     })
 
