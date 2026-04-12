@@ -370,7 +370,7 @@ const Register = () => {
             </div>
             <div className="reg-pill">
               <div className="reg-pill-dot" />
-              <span className="reg-pill-text">No credit card required to sign up</span>
+              <span className="reg-pill-text">After register verify your email</span>
             </div>
             <div className="reg-pill">
               <div className="reg-pill-dot" />

@@ -76,10 +76,10 @@ const Dashboard = () => {
         .db-root {
           min-height: 100vh;
           width: 100%;
-          background: #222022;
+          background: #0a0a0f;
           padding: 12px;
           font-family: 'DM Sans', sans-serif;
-          color: #C3D809;
+          color: #31b8c6;
         }
         @media (min-width: 768px) { .db-root { padding: 20px; } }
 
@@ -100,8 +100,8 @@ const Dashboard = () => {
           width: 266px;
           flex-shrink: 0;
           border-radius: 22px;
-          background: #1c1a1c;
-          border: 1px solid rgba(195,216,9,0.1);
+          background: linear-gradient(135deg, #0d1f22 0%, #091418 100%);
+          border: 1px solid rgba(49,184,198,0.16);
           padding: 18px 12px;
           flex-direction: column;
           overflow: hidden;
@@ -111,25 +111,25 @@ const Dashboard = () => {
         .db-logo {
           display: flex; align-items: center; gap: 10px;
           padding: 2px 6px 18px;
-          border-bottom: 1px solid rgba(195,216,9,0.1);
+          border-bottom: 1px solid rgba(49,184,198,0.16);
           margin-bottom: 14px;
         }
         .db-logo-mark {
           width: 30px; height: 30px; border-radius: 8px;
-          background: #C3D809;
+          background: #31b8c6;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
         .db-logo-name {
           font-family: 'Syne', sans-serif;
           font-weight: 800; font-size: 1.05rem;
-          color: #C3D809; letter-spacing: -0.02em;
+          color: #f0fafb; letter-spacing: -0.02em;
         }
 
         .db-section-label {
           font-size: 0.66rem; font-weight: 500;
           letter-spacing: 0.14em; text-transform: uppercase;
-          color: rgba(195,216,9,0.3);
+          color: rgba(49,184,198,0.45);
           padding: 0 6px 8px;
         }
 
@@ -140,7 +140,7 @@ const Dashboard = () => {
         .db-chat-list::-webkit-scrollbar { width: 3px; }
         .db-chat-list::-webkit-scrollbar-track { background: transparent; }
         .db-chat-list::-webkit-scrollbar-thumb {
-          background: rgba(195,216,9,0.15); border-radius: 4px;
+          background: rgba(49,184,198,0.2); border-radius: 4px;
         }
 
         .db-chat-btn {
@@ -152,14 +152,14 @@ const Dashboard = () => {
           text-align: left;
           font-family: 'DM Sans', sans-serif;
           font-size: 0.83rem; font-weight: 500;
-          color: rgba(195,216,9,0.55);
+          color: rgba(240,250,251,0.6);
           transition: all 0.15s;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .db-chat-btn:hover {
-          background: rgba(195,216,9,0.07);
-          border-color: rgba(195,216,9,0.15);
-          color: #C3D809;
+          background: rgba(49,184,198,0.08);
+          border-color: rgba(49,184,198,0.22);
+          color: #f0fafb;
         }
         .db-chat-item {
           display: flex;
@@ -173,9 +173,9 @@ const Dashboard = () => {
           width: 24px;
           height: 24px;
           border-radius: 8px;
-          border: 1px solid rgba(195,216,9,0.12);
+          border: 1px solid rgba(49,184,198,0.2);
           background: transparent;
-          color: rgba(195,216,9,0.45);
+          color: rgba(240,250,251,0.45);
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -184,32 +184,32 @@ const Dashboard = () => {
           flex-shrink: 0;
         }
         .db-chat-delete-btn:hover {
-          color: #C3D809;
-          border-color: rgba(195,216,9,0.35);
-          background: rgba(195,216,9,0.08);
+          color: #f0fafb;
+          border-color: rgba(49,184,198,0.45);
+          background: rgba(49,184,198,0.12);
         }
 
         .db-sidebar-footer {
           padding-top: 12px;
-          border-top: 1px solid rgba(195,216,9,0.08);
+          border-top: 1px solid rgba(49,184,198,0.14);
           margin-top: 8px;
         }
         .db-new-btn {
           width: 100%;
           display: flex; align-items: center; justify-content: center; gap: 7px;
           padding: 9px 14px;
-          background: rgba(195,216,9,0.09);
-          border: 1px solid rgba(195,216,9,0.22);
+          background: rgba(49,184,198,0.08);
+          border: 1px solid rgba(49,184,198,0.24);
           border-radius: 11px;
-          color: #C3D809;
+          color: #f0fafb;
           font-family: 'DM Sans', sans-serif;
           font-size: 0.83rem; font-weight: 500;
           cursor: pointer;
           transition: all 0.15s;
         }
         .db-new-btn:hover {
-          background: rgba(195,216,9,0.16);
-          border-color: rgba(195,216,9,0.4);
+          background: rgba(49,184,198,0.16);
+          border-color: rgba(49,184,198,0.5);
         }
 
         /* ─── MAIN ────────────────────────────── */
@@ -217,8 +217,8 @@ const Dashboard = () => {
           flex: 1; min-width: 0;
           display: flex; flex-direction: column;
           border-radius: 22px;
-          background: #1c1a1c;
-          border: 1px solid rgba(195,216,9,0.1);
+          background: linear-gradient(180deg, #0d1f22 0%, #091418 100%);
+          border: 1px solid rgba(49,184,198,0.16);
           overflow: hidden;
           position: relative;
         }
@@ -226,31 +226,31 @@ const Dashboard = () => {
         .db-topbar {
           display: flex; align-items: center; gap: 10px;
           padding: 13px 18px;
-          border-bottom: 1px solid rgba(195,216,9,0.08);
-          background: rgba(28,26,28,0.92);
+          border-bottom: 1px solid rgba(49,184,198,0.14);
+          background: rgba(10,10,15,0.7);
           backdrop-filter: blur(12px);
           flex-shrink: 0;
         }
         .db-status-badge {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 4px 11px;
-          background: rgba(195,216,9,0.08);
-          border: 1px solid rgba(195,216,9,0.18);
+          background: rgba(49,184,198,0.1);
+          border: 1px solid rgba(49,184,198,0.24);
           border-radius: 100px;
           font-size: 0.73rem; font-weight: 500;
-          color: #C3D809;
+          color: #31b8c6;
         }
         .db-status-dot {
           width: 6px; height: 6px; border-radius: 50%;
-          background: #C3D809;
-          box-shadow: 0 0 7px rgba(195,216,9,0.85);
+          background: #31b8c6;
+          box-shadow: 0 0 7px rgba(49,184,198,0.85);
           animation: livePulse 2s ease-in-out infinite;
         }
         .db-chat-title {
           flex: 1;
           font-family: 'Syne', sans-serif;
           font-size: 0.88rem; font-weight: 700;
-          color: rgba(195,216,9,0.4);
+          color: rgba(240,250,251,0.5);
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .db-logout-btn {
@@ -260,9 +260,9 @@ const Dashboard = () => {
           gap: 6px;
           padding: 7px 12px;
           border-radius: 10px;
-          border: 1px solid rgba(195,216,9,0.2);
+          border: 1px solid rgba(49,184,198,0.24);
           background: transparent;
-          color: #C3D809;
+          color: #f0fafb;
           font-family: 'DM Sans', sans-serif;
           font-size: 0.78rem;
           font-weight: 500;
@@ -270,8 +270,8 @@ const Dashboard = () => {
           transition: all 0.15s;
         }
         .db-logout-btn:hover {
-          background: rgba(195,216,9,0.08);
-          border-color: rgba(195,216,9,0.45);
+          background: rgba(49,184,198,0.12);
+          border-color: rgba(49,184,198,0.5);
         }
 
         /* messages area */
@@ -284,7 +284,7 @@ const Dashboard = () => {
         .db-messages::-webkit-scrollbar { width: 4px; }
         .db-messages::-webkit-scrollbar-track { background: transparent; }
         .db-messages::-webkit-scrollbar-thumb {
-          background: rgba(195,216,9,0.12); border-radius: 4px;
+          background: rgba(49,184,198,0.18); border-radius: 4px;
         }
 
         /* user bubble */
@@ -293,9 +293,9 @@ const Dashboard = () => {
           margin-left: auto;
           border-radius: 18px 18px 4px 18px;
           padding: 10px 15px;
-          background: rgba(195,216,9,0.11);
-          border: 1px solid rgba(195,216,9,0.2);
-          color: #C3D809;
+          background: rgba(49,184,198,0.14);
+          border: 1px solid rgba(49,184,198,0.28);
+          color: #f0fafb;
           font-size: 0.91rem; line-height: 1.55;
           animation: fadeUp 0.25s ease both;
         }
@@ -306,9 +306,9 @@ const Dashboard = () => {
           margin-right: auto;
           border-radius: 18px 18px 18px 4px;
           padding: 10px 15px;
-          background: rgba(195,216,9,0.04);
-          border: 1px solid rgba(195,216,9,0.08);
-          color: rgba(195,216,9,0.8);
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(49,184,198,0.16);
+          color: rgba(240,250,251,0.9);
           font-size: 0.91rem; line-height: 1.65;
           animation: fadeUp 0.25s ease both;
         }
@@ -316,8 +316,8 @@ const Dashboard = () => {
         .db-msg-ai p:last-child { margin-bottom: 0; }
         .db-msg-ai ul        { margin-bottom: 7px; list-style: disc; padding-left: 18px; }
         .db-msg-ai ol        { margin-bottom: 7px; list-style: decimal; padding-left: 18px; }
-        .db-msg-ai code      { background: rgba(195,216,9,0.1); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
-        .db-msg-ai pre       { background: rgba(0,0,0,0.35); border: 1px solid rgba(195,216,9,0.1); border-radius: 11px; padding: 12px; overflow-x: auto; margin-bottom: 7px; }
+        .db-msg-ai code      { background: rgba(49,184,198,0.12); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .db-msg-ai pre       { background: rgba(0,0,0,0.35); border: 1px solid rgba(49,184,198,0.16); border-radius: 11px; padding: 12px; overflow-x: auto; margin-bottom: 7px; }
         .db-msg-ai pre code  { background: transparent; padding: 0; }
 
         .db-typing {
@@ -327,9 +327,9 @@ const Dashboard = () => {
           max-width: fit-content;
           border-radius: 16px 16px 16px 4px;
           padding: 10px 14px;
-          background: rgba(195,216,9,0.04);
-          border: 1px solid rgba(195,216,9,0.08);
-          color: rgba(195,216,9,0.65);
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(49,184,198,0.16);
+          color: rgba(240,250,251,0.7);
           font-size: 0.82rem;
           animation: fadeUp 0.25s ease both;
         }
@@ -341,7 +341,7 @@ const Dashboard = () => {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #C3D809;
+          background: #31b8c6;
           animation: dotPulse 1.25s infinite ease-in-out;
         }
         .db-typing-dots span:nth-child(2) { animation-delay: 0.18s; }
@@ -357,18 +357,18 @@ const Dashboard = () => {
         }
         .db-empty-icon {
           width: 50px; height: 50px; border-radius: 14px;
-          background: rgba(195,216,9,0.08);
-          border: 1px solid rgba(195,216,9,0.18);
+          background: rgba(49,184,198,0.1);
+          border: 1px solid rgba(49,184,198,0.26);
           display: flex; align-items: center; justify-content: center;
         }
         .db-empty-title {
           font-family: 'Syne', sans-serif;
           font-size: 1.2rem; font-weight: 800;
-          color: #C3D809; letter-spacing: -0.02em;
+          color: #f0fafb; letter-spacing: -0.02em;
         }
         .db-empty-sub {
           font-size: 0.83rem;
-          color: rgba(195,216,9,0.35);
+          color: rgba(240,250,251,0.55);
           text-align: center; max-width: 280px; line-height: 1.6;
         }
 
@@ -377,8 +377,8 @@ const Dashboard = () => {
           position: absolute;
           bottom: 12px; left: 12px; right: 12px;
           border-radius: 18px;
-          background: #222022;
-          border: 1px solid rgba(195,216,9,0.18);
+          background: rgba(10,10,15,0.92);
+          border: 1px solid rgba(49,184,198,0.22);
           padding: 12px 14px;
           box-shadow: 0 -6px 28px rgba(0,0,0,0.45);
         }
@@ -391,20 +391,20 @@ const Dashboard = () => {
 
         .db-input {
           flex: 1;
-          background: rgba(195,216,9,0.05);
-          border: 1px solid rgba(195,216,9,0.16);
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(49,184,198,0.2);
           border-radius: 12px;
           padding: 10px 14px;
           font-family: 'DM Sans', sans-serif;
           font-size: 0.93rem;
-          color: #C3D809;
+          color: #f0fafb;
           outline: none;
           transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .db-input::placeholder { color: rgba(195,216,9,0.25); }
+        .db-input::placeholder { color: rgba(240,250,251,0.35); }
         .db-input:focus {
-          border-color: rgba(195,216,9,0.45);
-          box-shadow: 0 0 0 3px rgba(195,216,9,0.07);
+          border-color: rgba(49,184,198,0.5);
+          box-shadow: 0 0 0 3px rgba(49,184,198,0.16);
         }
 
         .db-send-btn {
@@ -412,8 +412,8 @@ const Dashboard = () => {
           padding: 10px 22px;
           border-radius: 12px;
           border: none;
-          background: #C3D809;
-          color: #1c1a1c;
+          background: #31b8c6;
+          color: #0a0a0f;
           font-family: 'Syne', sans-serif;
           font-size: 0.87rem; font-weight: 700;
           letter-spacing: 0.01em;
@@ -423,8 +423,8 @@ const Dashboard = () => {
           flex-shrink: 0;
         }
         .db-send-btn:hover:not(:disabled) {
-          background: #d4ea0a;
-          box-shadow: 0 4px 18px rgba(195,216,9,0.28);
+          background: #5dd2dd;
+          box-shadow: 0 4px 18px rgba(49,184,198,0.35);
           transform: translateY(-1px);
         }
         .db-send-btn:active:not(:disabled) { transform: translateY(0); }
@@ -439,8 +439,8 @@ const Dashboard = () => {
             <div className="db-logo">
               <div className="db-logo-mark">
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="#1c1a1c" strokeWidth="2.2" strokeLinejoin="round"/>
-                  <circle cx="10" cy="10" r="2.5" fill="#1c1a1c"/>
+                  <path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="#0a0a0f" strokeWidth="2.2" strokeLinejoin="round"/>
+                  <circle cx="10" cy="10" r="2.5" fill="#0a0a0f"/>
                 </svg>
               </div>
               <span className="db-logo-name">NexChat</span>
@@ -503,7 +503,7 @@ const Dashboard = () => {
               {!chats[currentChatId]?.messages?.length ? (
                 <div className="db-empty">
                   <div className="db-empty-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C3D809" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#31b8c6" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                   </div>
