@@ -2,12 +2,27 @@ import userModel from "../model/user.model.js";
 import jwt from "jsonwebtoken";
 import {config} from "../config/config.js";
 
-async function tokenResposnse(user, res) {
-    const token = jwt.sign(
-        { id: user._id },
-        config.JWT_SECRET,
-        { expiresIn: "7d" }
-    );
+async function sendTokenResponse(user, res, message) {
+    const token = jwt.sign( { id: user._id }, config.JWT_SECRET,{ expiresIn: "7d" }	);
+
+	res.cookie("token", token, {
+		httpOnly: true,
+		secure: config.NODE_ENV === "production",
+		sameSite: "strict",
+		maxAge: 7 * 24 * 60 * 60 * 1000,
+	});
+
+	res.status(200).json({
+		message,
+		success: true,
+		user: {
+			id: user._id,
+			email: user.email,
+			fullname: user.fullname,
+			role: user.role,
+			contract: user.contract,
+		},
+	});
 }
 
 export const register = async (req, res) => {
@@ -23,17 +38,12 @@ export const register = async (req, res) => {
 		const user = await userModel.create({
 			email,
 			contract,
-			password:
+			password,
 			fullname,
-			role,
 		});
 
-		const token = jwt.sign(
-			{ id: user._id, email: user.email, role: user.role },
-			config.JWT_SECRET,
-			{ expiresIn: "7d" }
-		);
-
+		await sendTokenResponse(user, res, "User registered successfully.");
+		
 		res.cookie("token", token, {
 			httpOnly: true,
 			secure: config.NODE_ENV === "production",
