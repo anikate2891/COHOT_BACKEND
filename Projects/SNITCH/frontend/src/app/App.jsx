@@ -1,6 +1,7 @@
 import React from 'react'
 import {Routes, Route} from 'react-router-dom'
-import Register from './pages/Register.jsx'
+import Register from '../pages/Register.jsx'
+import './app.css'
 
 const App = () => {
   return (
