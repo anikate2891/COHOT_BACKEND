@@ -1,8 +1,7 @@
 import React from 'react'
-import Register from '../pages/Register.jsx'
 import './app.css'
-import { RouterProvider } from 'react-router-dom'
-import { routes } from './app.route.js'
+import { RouterProvider } from 'react-router'
+import { routes } from './app.route.jsx'
 
 const App = () => {
   return (
