@@ -1,14 +1,13 @@
 import React from 'react'
-import {Routes, Route} from 'react-router-dom'
 import Register from '../pages/Register.jsx'
 import './app.css'
+import { RouterProvider } from 'react-router-dom'
+import { routes } from './app.route.js'
 
 const App = () => {
   return (
     <>
-      <Routes>
-        <Route path="/register" element={<Register />} />
-      </Routes>
+      <RouterProvider router={routes} />
     </>
   )
 }
