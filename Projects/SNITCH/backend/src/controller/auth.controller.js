@@ -2,9 +2,6 @@ import userModel from "../model/user.model.js";
 import jwt from "jsonwebtoken";
 import {config} from "../config/config.js";
 
-
-
-
 async function sendTokenResponse(user, res, message) {
     const token = jwt.sign( { id: user._id }, config.JWT_SECRET,{ expiresIn: "7d" }	);
 
@@ -89,7 +86,35 @@ export const loginController = async (req, res) => {
 } 
 
 export const googleCallbackController = async (req, res) => {
-	console.log(req.user);
-	res.redirect('http://localhost:5173'); // Redirect to your frontend after successful authentication
-	
+	const { id, emails, displayName, photos } = req.user
+	const email = emails[0].value;
+	const profilePic = photos[0].value;
+
+	try {
+		let user = await userModel.findOne({ email });
+		if (!user) {
+			user = await userModel.create({
+				email,
+				fullname: displayName,
+				googleId: id,
+			})
+			const token = jwt.sign( 
+				{ id: user._id }, 
+				config.JWT_SECRET,
+				{ expiresIn: "7d" }	);
+			res.cookie("token",token);
+		}	
+		return res.redirect('http://localhost:5173');
+	} catch (error) {
+		return res.status(500).json({ message: "Google authentication failed.", error: error.message });
+	}
+
+
+
+
+
+
+
+
+	// res.redirect('http://localhost:5173'); 
 }

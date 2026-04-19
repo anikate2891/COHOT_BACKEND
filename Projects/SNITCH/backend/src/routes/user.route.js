@@ -12,6 +12,7 @@ authRouter.get("/google",
     passport.authenticate("google", { scope: ["profile", "email"] }));
 
 authRouter.get("/google/callback", 
-    passport.authenticate("google", { session: false }), googleCallbackController);
+    passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173/login" }), googleCallbackController);
+    // Server k pass se auth code goggle k pass leke jayega & uske basics par user details lege aygea and authenticate kar dega, uske baad google callback controller me user details ko handle karenge aur response bhejenge.
 
 export default authRouter;      
