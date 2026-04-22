@@ -21,12 +21,17 @@ if (!process.env.GOOGLE_CLIENT_SECRET) {
     throw new Error("GOOGLE_CLIENT_SECRET is not defined in the environment variables.");
 }
 
+if (!process.env.IMAGE_KIT_KEY) {
+    throw new Error("IMAGE_KIT_KEY is not defined in the environment variables.");
+}
+
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
     PORT: process.env.PORT,
     JWT_SECRET: process.env.JWT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    IMAGE_KIT_KEY: process.env.IMAGE_KIT_KEY,
     // NODE_ENV: process.env.NODE_ENV || "development",
 };
 

@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookie from 'cookie-parser';
 import authRouter from './routes/user.route.js';
+import productRouter from './routes/product.route.js';
 import { config } from './config/config.js';
 
 import passport from 'passport';
@@ -31,7 +32,7 @@ app.use(morgan('dev'));
 app.use(cookie());
 
 app.use('/api/auth', authRouter);   
-
+app.use('/api/products', productRouter);
 
 export default app;
 
