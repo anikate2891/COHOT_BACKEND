@@ -33,3 +33,16 @@ export async function createProductController(req, res) {
         res.status(500).json({ message: 'Failed to create product' });
     }
 }
+
+
+export async function getSellerProductsController(req, res) {
+    const seller = req.user;
+
+    try {
+        const products = await productModel.find({ seller: seller._id });
+        res.status(200).json({ message: 'Products fetched successfully', success: true, products });
+    } catch (error) {
+        console.error('getSellerProductsController:', error);
+        res.status(500).json({ message: 'Failed to fetch products' });
+    }
+}
