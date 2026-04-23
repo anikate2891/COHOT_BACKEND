@@ -46,3 +46,13 @@ export async function getSellerProductsController(req, res) {
         res.status(500).json({ message: 'Failed to fetch products' });
     }
 }
+
+export async function getAllProductsController(req, res) {
+    try {
+        const products = await productModel.find();
+        res.status(200).json({ message: 'Products fetched successfully', success: true, products });
+    } catch (error) {
+        console.error('getAllProductsController:', error);
+        res.status(500).json({ message: 'Failed to fetch products' });
+    }
+}

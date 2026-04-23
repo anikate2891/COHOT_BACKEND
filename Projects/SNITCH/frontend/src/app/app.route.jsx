@@ -3,17 +3,19 @@ import Register from "../features/auth/pages/Register.jsx";
 import Login from "../features/auth/pages/Login.jsx";
 import Product from "../features/products/pages/Product.jsx";
 import DashBoard from "../features/products/pages/DashBoard.jsx";
+import Protected from "../features/auth/components/Protected.jsx";
+import Home from "../features/products/pages/Home.jsx";
 
 export const routes = createBrowserRouter([
-    { path: "/", element: <h1>Home</h1> },
+    { path: "/", element: <Home /> },
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Register /> },
 
     // seller routes
     { path: "/seller",
         children: [
-            { path: "/seller/create-product", element: <Product /> },
-            { path: "/seller/dashboard", element: <DashBoard /> }
+            { path: "/seller/create-product", element: <Protected role="seller"><Product /></Protected> },
+            { path: "/seller/dashboard", element: <Protected role="seller"><DashBoard /></Protected> },
         ]
     }
 ]);

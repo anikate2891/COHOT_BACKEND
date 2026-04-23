@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { registerController, loginController, googleCallbackController } from "../controller/auth.controller.js";
+import { registerController, loginController, googleCallbackController, getMeController } from "../controller/auth.controller.js";
 import { registerValidator, loginValidator } from "../validator/auth.validator.js";
 import passport from "passport";
+import { authenticateUser } from "../middleware/auth.middleware.js";    
 
 const authRouter = Router();
 
@@ -14,5 +15,7 @@ authRouter.get("/google",
 authRouter.get("/google/callback", 
     passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173/login" }), googleCallbackController);
     // Server k pass se auth code goggle k pass leke jayega & uske basics par user details lege aygea and authenticate kar dega, uske baad google callback controller me user details ko handle karenge aur response bhejenge.
+
+authRouter.get("/me",authenticateUser, getMeController); 
 
 export default authRouter;      

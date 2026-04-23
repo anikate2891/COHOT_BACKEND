@@ -85,6 +85,18 @@ export const loginController = async (req, res) => {
 
 } 
 
+export const getMeController = async (req, res, next) => {
+	try {
+		const user = await userModel.findById(req.user.id).select('-password');
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
+		}
+		return res.status(200).json({message: "User details fetched successfully.", user });
+	} catch (error) {
+		return res.status(500).json({ message: "Failed to fetch user details.", error: error.message });
+	}
+}
+
 export const googleCallbackController = async (req, res) => {
 	const { id, emails, displayName, photos } = req.user
 	const email = emails[0].value;

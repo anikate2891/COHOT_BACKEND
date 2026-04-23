@@ -37,3 +37,8 @@ export async function loginUser({ email, password }) {
     });
     return response.data;
 }   
+
+export async function getMe() {
+    const response = await api.get('/me');
+    return response.data;
+}
