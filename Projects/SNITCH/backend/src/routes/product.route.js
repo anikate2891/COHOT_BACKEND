@@ -16,7 +16,7 @@ const productRouter = express.Router();
  * @desc Create a new product
  * @access Private (Seller only)
  */
-productRouter.post('/', authenticateSeller, validateProduct, upload.array('image',6), createProductController);
+productRouter.post('/', authenticateSeller, upload.array('image',7), validateProduct,  createProductController);
 
 productRouter.get('/seller', authenticateSeller, getSellerProductsController); 
 
