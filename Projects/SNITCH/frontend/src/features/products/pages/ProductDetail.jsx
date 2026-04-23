@@ -105,7 +105,11 @@ const ProductDetail = () => {
                     key={image._id || index}
                     type="button"
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square overflow-hidden border ${index === selectedImageIndex ? 'border-[#1f1b16]' : 'border-[#d7cebf]'} bg-[#e6ddcf] transition`}
+                    className={`aspect-square overflow-hidden border bg-[#e6ddcf] transition ${
+                      index === selectedImageIndex
+                        ? 'border-[#1f1b16] opacity-100'
+                        : 'border-[#d7cebf] opacity-45 hover:opacity-75'
+                    }`}
                   >
                     {image.url ? (
                       <img
@@ -140,7 +144,7 @@ const ProductDetail = () => {
                     <button
                       type="button"
                       onClick={handlePreviousImage}
-                      className="absolute left-3 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#2f2921] bg-[#3a332a]/90 text-lg font-bold leading-none text-[#f4f0e9] opacity-0 shadow-sm transition duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-[#2c261f] focus-visible:opacity-100 focus-visible:outline-none"
+                      className="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center bg-[#f6f1e8] text-2xl font-black leading-none text-[#5f584e] rounded-lg opacity-0 transition-all duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-[#efe8dc] hover:text-[#1f1b16] focus-visible:opacity-100 focus-visible:outline-none"
                       aria-label="Previous image"
                     >
                       &larr;
@@ -148,7 +152,7 @@ const ProductDetail = () => {
                     <button
                       type="button"
                       onClick={handleNextImage}
-                      className="absolute right-3 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#2f2921] bg-[#3a332a]/90 text-lg font-bold leading-none text-[#f4f0e9] opacity-0 shadow-sm transition duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-[#2c261f] focus-visible:opacity-100 focus-visible:outline-none"
+                      className="absolute rounded-xl right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center bg-[#f6f1e8] text-2xl font-black leading-none text-[#5f584e] opacity-0 transition-all duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-[#efe8dc] hover:text-[#1f1b16] focus-visible:opacity-100 focus-visible:outline-none"
                       aria-label="Next image"
                     >
                       &rarr;
