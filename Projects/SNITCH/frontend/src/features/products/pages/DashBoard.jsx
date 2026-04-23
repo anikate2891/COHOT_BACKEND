@@ -3,6 +3,7 @@ import { useProduct } from '../hook/useProduct.js';
 import { useSelector } from 'react-redux';
 import { Link} from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../auth/components/Loader.jsx';
 
 const DashBoard = () => {
     const navigate = useNavigate();
@@ -121,7 +122,7 @@ const DashBoard = () => {
 
                     {isLoading && (
                         <div className="mt-8 border border-[#d9cebe] bg-[#eee7da] p-5 text-sm text-[#3f3930]">
-                            Loading products...
+                            <Loader />
                         </div>
                     )}
 
@@ -144,6 +145,7 @@ const DashBoard = () => {
                                 return (
                                     <article
                                     onClick={()=>{navigate(`/seller/product/${product._id}`)}}
+                                    
                                     key={product._id} className="space-y-3">
                                         <div className="aspect-square overflow-hidden bg-[#dbd1c3]">
                                             {imageUrl ? (

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useProduct } from '../hook/useProduct.js';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../auth/components/Loader.jsx';
 
 const Home = () => {
         const navigate = useNavigate();
@@ -111,7 +112,7 @@ const Home = () => {
 
                 {isLoading && (
                     <div className="mt-8 border border-[#d9cebe] bg-[#eee7da] p-5 text-sm text-[#3f3930]">
-                        Loading products...
+                        <Loader/>
                     </div>
                 )}
 

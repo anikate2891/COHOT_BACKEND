@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useProduct } from '../hook/useProduct.js';
 import { Link } from 'react-router-dom';
+import Loader from '../../auth/components/Loader.jsx';
 
 const ProductDetail = () => {
     const { productId } = useParams();
@@ -55,7 +56,7 @@ const ProductDetail = () => {
         return (
             <main className="min-h-screen bg-[#f4f0e9] px-5 py-8 text-[#1f1b16] sm:px-8 lg:px-10">
                 <div className="mx-auto max-w-7xl border border-[#ded5c8] bg-[#f7f3eb] p-6 text-sm">
-                    Loading product details...
+                    <Loader/>
                 </div>
             </main>
         );
