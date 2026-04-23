@@ -8,7 +8,7 @@ async function sendTokenResponse(user, res, message) {
 	res.cookie("token", token, {
 		httpOnly: true,
 		secure: config.NODE_ENV === "production",
-		sameSite: "strict",
+		sameSite: "lax",
 		maxAge: 7 * 24 * 60 * 60 * 1000,
 	});
 
@@ -61,22 +61,23 @@ export const registerController = async (req, res) => {
 }
 
 export const loginController = async (req, res) => {
-	const { email, password } = req.body;
-	try {
-		const user = await userModel.findOne({ email });
-		if (!user) {
-			return res.status(404).json({ message: "User not found." });
-		}
-		const isMatch = await user.comparePassword(password);
-		if (!isMatch) {
-			return res.status(401).json({ message: "Invalid credentials." });
-		}
-		await sendTokenResponse(user, res, "Login successful.");
-	} catch (error) {
-		return res.status(500).json({ message: "Login failed.", error: error.message });
-	}
-
-} 
+    const { email, password } = req.body;
+    try {
+        const user = await userModel.findOne({ email });
+        console.log('User found:', user?.email, 'Role:', user?.role) // ← add karo
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const isMatch = await user.comparePassword(password);
+        console.log('Password match:', isMatch) // ← add karo
+        if (!isMatch) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+        await sendTokenResponse(user, res, "Login successful.");
+    } catch (error) {
+        return res.status(500).json({ message: "Login failed.", error: error.message });
+    }
+}
 
 export const getMeController = async (req, res, next) => {
 	try {
@@ -91,26 +92,43 @@ export const getMeController = async (req, res, next) => {
 }
 
 export const googleCallbackController = async (req, res) => {
-	const { id, emails, displayName, photos } = req.user
-	const email = emails[0].value;
-	const profilePic = photos[0].value;
+    const { id, emails, displayName, photos } = req.user
+    const email = emails[0].value;
+    const profilePic = photos[0].value;
 
-	try {
-		let user = await userModel.findOne({ email });
-		if (!user) {
-			user = await userModel.create({
-				email,
-				fullname: displayName,
-				googleId: id,
-			})
-			const token = jwt.sign( 
-				{ id: user._id }, 
-				config.JWT_SECRET,
-				{ expiresIn: "7d" }	);
-			res.cookie("token",token);
-		}	
-		return res.redirect('http://localhost:5173');
-	} catch (error) {
-		return res.status(500).json({ message: "Google authentication failed.", error: error.message });
-	}
+    try {
+        let user = await userModel.findOne({ email });
+        if (!user) {
+            user = await userModel.create({
+                email,
+                fullname: displayName,
+                googleId: id,
+            })
+        }
+
+        // ✅ Bahar nikalo — har user ke liye token bane
+        const token = jwt.sign(
+            { id: user._id },
+            config.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        // ✅ Sahi options ke saath cookie set karo
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: config.NODE_ENV === "production",
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        // role ke basis pe redirect karo	
+		if (user.role === "seller") {
+			return res.redirect('http://localhost:5173/seller/dashboard');
+		} else {
+			return res.redirect('http://localhost:5173');
+		}
+    } catch (error) {
+        return res.status(500).json({ message: "Google authentication failed.", error: error.message });
+    }
 }

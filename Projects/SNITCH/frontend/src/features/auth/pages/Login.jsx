@@ -24,10 +24,13 @@ const Login = () => {
 
     try {
       const user = await handleLogin({ email: formData.email, password: formData.password })
-      if (user.role === 'buyer') {
+      console.log('Logged in user:', user)
+      if (user?.role === 'buyer') {
         navigate('/')
-      } else if (user.role === 'seller') {
+      } else if (user?.role === 'seller') {
         navigate('/seller/dashboard')
+      } else {
+        setErrorMessage('Role not found. Please contact support.')
       }
     } catch (error) {
       const apiMessage = error?.response?.data?.message

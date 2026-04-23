@@ -29,7 +29,23 @@ const productSchema = new mongoose.Schema({
     images:[{
         url:{type:String, required:true},
         // alt:{type:String}
-    }]
+    }],
+    variants:[{
+            images:[{
+                url:{type:String, required:true},
+            }],
+            stock:{type:Number, default:0},
+            attributes:{type:Map, of:String},
+            price:{
+                amount:{type:Number, required:true},
+                currency:{
+                    type:String,
+                    required:true,
+                    enum: ["INR","USD","EUR","GBP","JPY","CNY"],
+                    default:"INR"
+                }
+            }
+    }],
 }, { timestamps: true });
 
 const productModel= mongoose.model('Product', productSchema);

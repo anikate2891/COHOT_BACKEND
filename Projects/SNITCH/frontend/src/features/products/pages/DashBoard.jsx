@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useProduct } from '../hook/useProduct.js';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const DashBoard = () => {
+    const navigate = useNavigate();
     const { handelGetSellerProducts } = useProduct();
     const sellerProducts = useSelector((state) => state.product.sellerProducts);
     const [isLoading, setIsLoading] = useState(true);
@@ -140,7 +142,9 @@ const DashBoard = () => {
                             {sellerProducts.map((product) => {
                                 const imageUrl = product?.images?.[0]?.url;
                                 return (
-                                    <article key={product._id} className="space-y-3">
+                                    <article
+                                    onClick={()=>{navigate(`/seller/product/${product._id}`)}}
+                                    key={product._id} className="space-y-3">
                                         <div className="aspect-square overflow-hidden bg-[#dbd1c3]">
                                             {imageUrl ? (
                                                 <img src={imageUrl} alt={product.title} className="h-full w-full object-cover" />
