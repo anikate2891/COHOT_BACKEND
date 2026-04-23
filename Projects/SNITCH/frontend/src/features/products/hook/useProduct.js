@@ -1,4 +1,4 @@
-import { createProducts, getSellerProducts,getAllProducts } from '../services/product.api.js';
+import { createProducts, getSellerProducts,getAllProducts, getProductDetails } from '../services/product.api.js';
 import { useDispatch } from 'react-redux';
 import { setSellerProducts, setAllProducts } from '../state/product.slice.js';
 import { useCallback } from 'react';
@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 export const useProduct = () => {
     const dispatch = useDispatch();
 
-   const handelCreateProduct = useCallback(async (data) => {
+    const handelCreateProduct = useCallback(async (data) => {
         try {
             const response = await createProducts(data);
             return response.product || response.products;
@@ -39,5 +39,15 @@ export const useProduct = () => {
         }
     }, [dispatch]);
 
-    return { handelCreateProduct, handelGetSellerProducts, handelGetAllProducts };
+    const handelGetProductDetails = useCallback(async (productId) => {
+        try {
+            const response = await getProductDetails(productId);
+            return response.product;
+        } catch (error) {
+            console.error('Error fetching product details:', error);
+            throw error;
+        }
+    }, []);
+
+    return { handelCreateProduct, handelGetSellerProducts, handelGetAllProducts, handelGetProductDetails };
 }

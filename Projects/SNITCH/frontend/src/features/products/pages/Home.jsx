@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useProduct } from '../hook/useProduct.js';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+        const navigate = useNavigate();
+
     const allProducts = useSelector((state) => state.product.allProducts);
     const user = useSelector((state) => state.auth.user);
     const authLoading = useSelector((state) => state.auth.loading);
@@ -129,7 +132,9 @@ const Home = () => {
                         {allProducts.map((product) => {
                             const imageUrl = product?.images?.[0]?.url;
                             return (
-                                <article key={product._id} className="space-y-3">
+                                <article
+                                onClick={() => navigate(`/product/${product._id}`)}
+                                key={product._id} className="space-y-3">
                                     <div className="aspect-square overflow-hidden bg-[#dbd1c3]">
                                         {imageUrl ? (
                                             <img src={imageUrl} alt={product.title} className="h-full w-full object-cover" />
@@ -160,7 +165,7 @@ const Home = () => {
                     </div>
                 )}
             </div>
-        </main>
+        </main> 
     )
 }
 

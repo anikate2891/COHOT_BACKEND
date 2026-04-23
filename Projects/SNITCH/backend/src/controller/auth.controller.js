@@ -44,13 +44,6 @@ export const registerController = async (req, res) => {
 			});
 
 			await sendTokenResponse(user, res, "User registered successfully.");
-			
-			res.cookie("token", token, {
-				httpOnly: true,
-				secure: config.NODE_ENV === "production",
-				sameSite: "strict",
-				maxAge: 7 * 24 * 60 * 60 * 1000,
-			});
 
 			return res.status(201).json({
 				message: "User registered successfully.",

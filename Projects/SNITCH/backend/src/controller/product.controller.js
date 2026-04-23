@@ -56,3 +56,20 @@ export async function getAllProductsController(req, res) {
         res.status(500).json({ message: 'Failed to fetch products' });
     }
 }
+
+export async function getProductDetailsController(req, res) {
+    const { id } = req.params;
+
+    try {
+        const product = await productModel.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        return res.status(200).json({ message: 'Product details fetched successfully', success: true, product });
+    
+    } catch (error) {
+        console.error('getProductDetailsController:', error);
+        res.status(500).json({ message: 'Failed to fetch product details' });
+    }
+}

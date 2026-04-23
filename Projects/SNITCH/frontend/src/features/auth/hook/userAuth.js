@@ -7,12 +7,15 @@ export const useUserAuth = () => {
     const dispatch = useDispatch();
 
     async function handleRegister({email, password, contact, fullname, isseller = false}) {
-        try { dispatch(setLoading(true));
+        try { 
+            dispatch(setLoading(true));
             const data = await registerUser({email, password, contact, fullname, isseller});
-            dispatch(setUser(data));
+            dispatch(setUser(data.user));
             return data.user;
         } catch (error) {
             dispatch(setError('User Registration', error.message));
+        } finally {
+            dispatch(setLoading(false));
         }
     }
 
