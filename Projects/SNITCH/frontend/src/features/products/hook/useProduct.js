@@ -1,4 +1,4 @@
-import { createProducts, getSellerProducts,getAllProducts, getProductDetails } from '../services/product.api.js';
+import { createProducts, getSellerProducts,getAllProducts, getProductDetails, createProductVariant, updateProductVariantStock, deleteProductVariant } from '../services/product.api.js';
 import { useDispatch } from 'react-redux';
 import { setSellerProducts, setAllProducts } from '../state/product.slice.js';
 import { useCallback } from 'react';
@@ -49,5 +49,43 @@ export const useProduct = () => {
         }
     }, []);
 
-    return { handelCreateProduct, handelGetSellerProducts, handelGetAllProducts, handelGetProductDetails };
+    const handelCreateProductVariant = useCallback(async (productId, variantData) => {
+        try {
+            const response = await createProductVariant(productId, variantData);
+            return response.variant;
+        } catch (error) {
+            console.error('Error creating product variant:', error);
+            throw error;
+        }
+    }, []);
+
+    const handelUpdateProductVariantStock = useCallback(async (productId, variantId, stock) => {
+        try {
+            const response = await updateProductVariantStock(productId, variantId, stock);
+            return response.variant;
+        } catch (error) {
+            console.error('Error updating product variant stock:', error);
+            throw error;
+        }
+    }, []);
+
+    const handelDeleteProductVariant = useCallback(async (productId, variantId) => {
+        try {
+            const response = await deleteProductVariant(productId, variantId);
+            return response.variantId;
+        } catch (error) {
+            console.error('Error deleting product variant:', error);
+            throw error;
+        }
+    }, []);
+
+    return {
+        handelCreateProduct,
+        handelGetSellerProducts,
+        handelGetAllProducts,
+        handelGetProductDetails,
+        handelCreateProductVariant,
+        handelUpdateProductVariantStock,
+        handelDeleteProductVariant,
+    };
 }

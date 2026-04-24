@@ -44,3 +44,33 @@ export async function getProductDetails(productId) {
         throw error;
     }
 }
+
+export async function createProductVariant(productId, variantData) {
+    try {
+        const response = await productApi.post(`/${productId}/variants`, variantData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating product variant:', error);
+        throw error;
+    }
+}
+
+export async function updateProductVariantStock(productId, variantId, stock) {
+    try {
+        const response = await productApi.patch(`/${productId}/variants/${variantId}/stock`, { stock });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating product variant stock:', error);
+        throw error;
+    }
+}
+
+export async function deleteProductVariant(productId, variantId) {
+    try {
+        const response = await productApi.delete(`/${productId}/variants/${variantId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting product variant:', error);
+        throw error;
+    }
+}
