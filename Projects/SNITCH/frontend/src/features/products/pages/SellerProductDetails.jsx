@@ -34,6 +34,7 @@ const SellerProductDetails = () => {
         stock: 0,
         priceAmount: '',
         priceCurrency: 'INR',
+        color: '',
         attributes: [{ key: '', value: '' }],
         imageFiles: [],
     });
@@ -66,6 +67,7 @@ const SellerProductDetails = () => {
                     ...prev,
                     priceCurrency: data?.price?.currency || 'INR',
                     priceAmount: '',
+                    color: '',
                 }));
                 seedStockDrafts(data?.variants || []);
                 setSelectedImageIndex(0);
@@ -157,6 +159,10 @@ const SellerProductDetails = () => {
             return acc;
         }, {});
 
+        if (variantForm.color.trim()) {
+            normalizedAttributes.color = variantForm.color.trim();
+        }
+
         if (Object.keys(normalizedAttributes).length === 0) {
             setSubmitMessage('Please add at least one attribute (example: size = M).');
             return;
@@ -187,6 +193,7 @@ const SellerProductDetails = () => {
                 stock: 0,
                 priceAmount: '',
                 priceCurrency: product?.price?.currency || 'INR',
+                color: '',
                 attributes: [{ key: '', value: '' }],
                 imageFiles: [],
             });
@@ -365,6 +372,27 @@ const SellerProductDetails = () => {
                                 <form onSubmit={handleCreateVariant} className="mt-4 space-y-4 border-t border-[#ddd3c4] pt-4">
                                     <div className="grid gap-5 lg:grid-cols-2">
                                         <div className="space-y-3">
+                                            <div className="space-y-1.5">
+                                                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Color</span>
+                                                <select
+                                                    value={variantForm.color}
+                                                    onChange={(event) => setVariantForm((prev) => ({ ...prev, color: event.target.value }))}
+                                                    className={baseInput}
+                                                >
+                                                    <option value="">Select color</option>
+                                                    <option value="Black">Black</option>
+                                                    <option value="White">White</option>
+                                                    <option value="Brown">Brown</option>
+                                                    <option value="Beige">Beige</option>
+                                                    <option value="Blue">Blue</option>
+                                                    <option value="Green">Green</option>
+                                                    <option value="Red">Red</option>
+                                                    <option value="Grey">Grey</option>
+                                                    <option value="Yellow">Yellow</option>
+                                                </select>
+                                                <p className="text-[11px] text-[#8d8477]">Stored in variant attributes as <span className="font-semibold">color</span>.</p>
+                                            </div>
+
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Attributes</p>
                                                 <button
@@ -485,7 +513,7 @@ const SellerProductDetails = () => {
                                     </div>
 
                                     <div className="flex flex-wrap items-center justify-between gap-3">
-                                        <p className="text-xs text-[#6f685d]">Create attribute combinations like size, color, fit and manage stock per variant.</p>
+                                        <p className="text-xs text-[#6f685d]">Create attribute combinations like color, size, fit and manage stock per variant.</p>
                                         <button
                                             type="submit"
                                             disabled={isSubmittingVariant}
