@@ -18,6 +18,8 @@ const Product = () => {
         description: '',
         priceAmount: '',
         priceCurrency: 'USD',
+        stock: '',
+        attributes: [{ key: '', value: '' }],
         images: [],
     });
 
@@ -37,6 +39,33 @@ const Product = () => {
     function handleChange(event) {
         const { name, value } = event.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
+    function updateAttributeRow(index, field, value) {
+        setFormData((prev) => {
+            const nextAttributes = [...prev.attributes];
+            nextAttributes[index] = { ...nextAttributes[index], [field]: value };
+            return { ...prev, attributes: nextAttributes };
+        });
+    }
+
+    function addAttributeRow() {
+        setFormData((prev) => ({
+            ...prev,
+            attributes: [...prev.attributes, { key: '', value: '' }],
+        }));
+    }
+
+    function removeAttributeRow(index) {
+        setFormData((prev) => {
+            if (prev.attributes.length === 1) {
+                return { ...prev, attributes: [{ key: '', value: '' }] };
+            }
+            return {
+                ...prev,
+                attributes: prev.attributes.filter((_, currentIndex) => currentIndex !== index),
+            };
+        });
     }
 
     function handleImageChange(event) {
@@ -80,12 +109,38 @@ const Product = () => {
             payload.append('description', formData.description.trim());
             payload.append('priceAmount', formData.priceAmount);
             payload.append('priceCurrency', formData.priceCurrency);
+
+            const normalizedAttributes = formData.attributes.reduce((acc, entry) => {
+                const key = entry.key.trim();
+                const value = entry.value.trim();
+                if (key && value) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
+
+            if (Object.keys(normalizedAttributes).length > 0) {
+                payload.append('attributes', JSON.stringify(normalizedAttributes));
+            }
+
+            if (formData.stock !== '') {
+                payload.append('stock', String(formData.stock));
+            }
+
             formData.images.forEach((file) => payload.append('image', file));
 
             await handelCreateProduct(payload);
             setSubmitSuccess(true);
             setSubmitMessage('Product listed successfully.');
-            setFormData({ title: '', description: '', priceAmount: '', priceCurrency: 'USD', images: [] });
+            setFormData({
+                title: '',
+                description: '',
+                priceAmount: '',
+                priceCurrency: 'USD',
+                stock: '',
+                attributes: [{ key: '', value: '' }],
+                images: [],
+            });
             if (fileInputRef.current) fileInputRef.current.value = '';
             navigate('/');
         } catch (error) {
@@ -119,13 +174,13 @@ const Product = () => {
                 <div className="md:grid md:grid-cols-[1.05fr_0.95fr]">
 
                     {/* Left — image panel */}
-                    <aside className="relative hidden h-full min-h-[520px] md:block">
+                    <aside className="relative hidden h-full min-h-130 md:block">
                         <img
                             src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80"
                             alt="Seller product showcase"
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-black/65 via-black/25 to-black/10" />
+                        <div className="absolute inset-0 bg-linear-to-tr from-black/65 via-black/25 to-black/10" />
                         <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                             <p className="text-[11px] uppercase tracking-[0.2em] text-[#f4f0e9]/85">SNITCH Atelier</p>
                             <h1
@@ -217,6 +272,64 @@ const Product = () => {
                                     </label>
                                 </div>
 
+                                {/* Stock */}
+                                <label className="block space-y-1.5">
+                                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6d665c]">Stock</span>
+                                    <input
+                                        type="number"
+                                        name="stock"
+                                        min="0"
+                                        value={formData.stock}
+                                        onChange={handleChange}
+                                        placeholder="0"
+                                        className={inputBase}
+                                    />
+                                </label>
+
+                                {/* Attributes */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6d665c]">Attributes</span>
+                                        <button
+                                            type="button"
+                                            onClick={addAttributeRow}
+                                            className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6c655a] underline-offset-2 hover:underline"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {formData.attributes.map((attribute, index) => (
+                                            <div key={`${attribute.key}-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={attribute.key}
+                                                    onChange={(event) => updateAttributeRow(index, 'key', event.target.value)}
+                                                    placeholder="Size"
+                                                    className={inputBase}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={attribute.value}
+                                                    onChange={(event) => updateAttributeRow(index, 'value', event.target.value)}
+                                                    placeholder="M"
+                                                    className={inputBase}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttributeRow(index)}
+                                                    className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[#d7cebf] text-[#6c655a] transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
+                                                    aria-label="Remove attribute"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-[#8b8377]">Optional now, but helps buyers pick variants later.</p>
+                                </div>
+
                                 {/* Images */}
                                 <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
@@ -229,7 +342,7 @@ const Product = () => {
                                         accept="image/*"
                                         multiple
                                         onChange={handleImageChange}
-                                        className="block w-full rounded-xl border border-[#d7cebf] bg-[#f7f3eb] px-4 py-3 text-sm text-[#1f1b16] file:mr-4 file:rounded-lg file:border-0 file:bg-[#1f1b16] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:uppercase file:tracking-[0.1em] file:text-[#f4f0e9] hover:file:bg-[#3a3328] transition"
+                                        className="block w-full rounded-xl border border-[#d7cebf] bg-[#f7f3eb] px-4 py-3 text-sm text-[#1f1b16] file:mr-4 file:rounded-lg file:border-0 file:bg-[#1f1b16] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:uppercase file:tracking-widest file:text-[#f4f0e9] hover:file:bg-[#3a3328] transition"
                                     />
                                     <p className="text-xs text-[#8b8377]">Up to 7 images. First image becomes the thumbnail.</p>
 

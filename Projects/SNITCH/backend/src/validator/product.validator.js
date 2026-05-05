@@ -15,5 +15,7 @@ export const validateProduct = [
     body('description').optional().isString().withMessage('Description must be a string'),
     body('priceCurrency').notEmpty().withMessage('Price currency is required').isIn(['USD', 'EUR','INR', 'GBP']).withMessage('Price currency must be USD, EUR, INR, or GBP'),
     body('priceAmount').notEmpty().withMessage('Price amount is required').isFloat({gt: 0}).withMessage('Price must be a positive number'),
+    body('stock').optional().isInt({ min: 0 }).withMessage('Stock must be a non-negative number'),
+    body('attributes').optional().isString().withMessage('Attributes must be a JSON string'),
     validateRequest
 ];

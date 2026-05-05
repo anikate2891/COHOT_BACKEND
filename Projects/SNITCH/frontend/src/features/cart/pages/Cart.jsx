@@ -10,17 +10,18 @@ const Cart = () => {
 
     useEffect(() => {
         handleGetCartItems();
-    }, [handleGetCartItems]);
+    }, []);
 
     const calculateSubtotal = () => {
         return cartitems?.reduce((total, item) => {
-            return total + (item.price.amount * item.quantity);
+            return total + ((item.price?.amount ?? 0) * item.quantity);
         }, 0) || 0;
     };
 
     const subtotal = calculateSubtotal();
 
     const getVariantDetails = (item) => {
+        if (!item.product || typeof item.product === 'string') return null; // ← guard
         return item.product.variants.find((v) => v._id === item.variant);
     };
 
@@ -117,7 +118,7 @@ const Cart = () => {
                                                         </div>
                                                     </div>
                                                     <div className="text-sm font-medium">
-                                                        {item.price.currency} {item.price.amount.toLocaleString()}
+                                                        {item.price?.currency ?? 'INR'} {item.price?.amount?.toLocaleString() ?? 0}
                                                     </div>
                                                 </div>
 

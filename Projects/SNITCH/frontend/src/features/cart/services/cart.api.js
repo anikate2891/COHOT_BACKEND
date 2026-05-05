@@ -18,8 +18,8 @@ export const getCartItems = async () => {
     return response.data;
 };
 
-export const removeItem = async ({ cartItemId }) => {
-    const response = await cartApi.delete(`/remove/${cartItemId}`);
+export const removeItem = async (itemId) => {
+    const response = await cartApi.delete(`/remove/${itemId}`);
     return response.data;
 };
 

@@ -41,11 +41,11 @@ const Login = () => {
   }
 
   return (
-    <main className="h-dvh overflow-hidden bg-[#f4f0e9] p-2 sm:p-4 lg:p-6">
-      <div className="mx-auto h-full w-full max-w-7xl overflow-hidden rounded-3xl border border-[#ddd3c4] bg-[#f8f4ec] shadow-[0_24px_60px_-40px_rgba(41,33,21,0.45)] md:grid md:grid-cols-[1.05fr_0.95fr]">
+    <main className="h-dvh overflow-hidden bg-[#f4f0e9]">
+      <div className="mx-auto h-full w-full max-w-7xl box-border overflow-hidden rounded-3xl border border-[#ddd3c4] bg-[#f8f4ec] p-2 shadow-[0_24px_60px_-40px_rgba(41,33,21,0.45)] sm:p-4 lg:p-6 md:grid md:grid-cols-[1.05fr_0.95fr] md:items-center">
         <aside className="relative hidden h-full md:block">
           <img
-            src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=80"
+            src="/Login.png"
             alt="Fashion e-commerce showcase"
             className="h-full w-full object-cover"
           />
@@ -64,7 +64,7 @@ const Login = () => {
           </div>
         </aside>
 
-        <section className="flex h-full items-center p-5 sm:p-7 lg:p-10">
+        <section className="flex h-full items-center p-5 sm:p-7 lg:p-9">
           <div className="w-full">
           <p className="text-[11px] uppercase tracking-[0.2em] text-[#766f63]">Welcome Back</p>
           <h2

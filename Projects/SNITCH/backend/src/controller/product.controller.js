@@ -4,7 +4,7 @@ import { uploadImageToStorage } from "../services/storage.service.js";
 export async function createProductController(req, res) {
     console.log("req.body:", req.body);
     console.log("req.files:", req.files);
-    const { title, description, priceAmount, priceCurrency } = req.body;
+    const { title, description, priceAmount, priceCurrency, stock, attributes } = req.body;
     const seller = req.user;
 
     try {
@@ -19,12 +19,44 @@ export async function createProductController(req, res) {
             })
         );
 
+        let parsedAttributes = {};
+        if (attributes) {
+            try {
+                parsedAttributes = JSON.parse(attributes);
+            } catch {
+                return res.status(400).json({ message: 'Attributes must be valid JSON.' });
+            }
+        }
+
+        const parsedStock = stock === undefined || stock === null || String(stock).trim() === ''
+            ? null
+            : Number(stock);
+
+        if (parsedStock !== null && (Number.isNaN(parsedStock) || parsedStock < 0)) {
+            return res.status(400).json({ message: 'Stock must be a non-negative number.' });
+        }
+
+        const shouldCreateVariant =
+            (parsedStock !== null) || (parsedAttributes && Object.keys(parsedAttributes).length > 0);
+
+        if (shouldCreateVariant && images.length === 0) {
+            return res.status(400).json({ message: 'Add at least one image to create initial attributes.' });
+        }
+
         const product = await productModel.create({
             title,
             description,
             price: { amount: priceAmount, currency: priceCurrency || 'INR' },
             seller: seller._id,
             images, // ✅ Ab [{url: '...'}, {url: '...'}] hoga
+            variants: shouldCreateVariant
+                ? [{
+                    images,
+                    stock: parsedStock ?? 0,
+                    attributes: parsedAttributes,
+                    price: { amount: priceAmount, currency: priceCurrency || 'INR' },
+                }]
+                : [],
         });
 
         res.status(201).json({ message: 'Product created successfully', product });

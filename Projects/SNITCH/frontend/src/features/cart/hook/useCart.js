@@ -10,20 +10,21 @@ import {
 
 export const useCart = () => {
     const dispatch = useDispatch();
+    const { handleGetCartItems } = useGetCartItems();
 
-    async function handleAddItem({ productId, variantId }) { // object destructure karo
-        try {
-            const data = await addItem({ productId, variantId });
-            dispatch(addItemToCart(data));
-            return data;
-        } catch (error) {
-            console.error('Error adding item to cart:', error);
-        }
+    async function handleAddItem({ productId, variantId }) {
+    try {
+        const data = await addItem({ productId, variantId });
+        await handleGetCartItems(); // ← local dispatch hatao, fresh data lo
+        return data;
+    } catch (error) {
+        console.error('Error adding item to cart:', error);
     }
+}
 
     async function handleRemoveItem(cartItemId) {
         try {
-            await removeItem({ cartItemId });
+            await removeItem(cartItemId);
             dispatch(removeItemFromCart(cartItemId));
         } catch (error) {
             console.error('Error removing item from cart:', error);

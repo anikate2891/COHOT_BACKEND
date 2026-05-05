@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useProduct } from '../hook/useProduct.js';
 import Loader from '../../auth/components/Loader.jsx';
@@ -11,9 +11,21 @@ const ProductDetail = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedAttributes, setSelectedAttributes] = useState({});
+    const [addToCartState, setAddToCartState] = useState('idle');
+    const resetTimerRef = useRef(null);
     const { handleAddItem } = useCart();
 
     const { handelGetProductDetails } = useProduct();
+
+    const normalizeKey = (value) => String(value || '').trim().toLowerCase();
+
+    const getVariantAttributeMap = (variant) => {
+        const map = {};
+        Object.entries(variant.attributes || {}).forEach(([key, value]) => {
+            map[normalizeKey(key)] = value;
+        });
+        return map;
+    };
 
      // Find matched variant based on selectedAttributes
     const matchedVariant = useMemo(() => {
@@ -21,9 +33,10 @@ const ProductDetail = () => {
         const keys = Object.keys(selectedAttributes);
         if (keys.length === 0) return null;
 
-        return product.variants.find((variant) =>
-            keys.every((key) => variant.attributes?.[key] === selectedAttributes[key])
-        ) || null;
+        return product.variants.find((variant) => {
+            const attributes = getVariantAttributeMap(variant);
+            return keys.every((key) => attributes[key] === selectedAttributes[key]);
+        }) || null;
     }, [product, selectedAttributes]);
 
     // All images: product images + selected variant images
@@ -41,13 +54,19 @@ const ProductDetail = () => {
         const groups = {};
         product.variants.forEach((variant) => {
             Object.entries(variant.attributes || {}).forEach(([key, value]) => {
-                if (!groups[key]) groups[key] = new Set();
-                groups[key].add(value);
+                const normalizedKey = normalizeKey(key);
+                if (!normalizedKey) return;
+                if (!groups[normalizedKey]) {
+                    groups[normalizedKey] = { label: key, values: new Set() };
+                }
+                groups[normalizedKey].values.add(value);
             });
         });
-        // Convert Sets to Arrays
         return Object.fromEntries(
-            Object.entries(groups).map(([key, set]) => [key, Array.from(set)])
+            Object.entries(groups).map(([key, group]) => [key, {
+                label: group.label,
+                values: Array.from(group.values),
+            }])
         );
     }, [product]);
 
@@ -78,10 +97,11 @@ const ProductDetail = () => {
         if (!product?.variants?.length) return false;
         const testSelection = { ...selectedAttributes, [key]: value };
         const otherKeys = Object.keys(testSelection).filter((k) => k !== key);
-        return product.variants.some((variant) =>
-            variant.attributes?.[key] === value &&
-            otherKeys.every((k) => !testSelection[k] || variant.attributes?.[k] === testSelection[k])
-        );
+            return product.variants.some((variant) => {
+                const attributes = getVariantAttributeMap(variant);
+                return attributes[key] === value &&
+                    otherKeys.every((k) => !testSelection[k] || attributes[k] === testSelection[k]);
+            });
     }
 
     function handleAttributeSelect(key, value) {
@@ -123,6 +143,14 @@ const ProductDetail = () => {
         }
         fetchProductDetails();
     }, [productId, handelGetProductDetails]);
+
+    useEffect(() => {
+        return () => {
+            if (resetTimerRef.current) {
+                clearTimeout(resetTimerRef.current);
+            }
+        };
+    }, []);
 
     if (isLoading) {
         return (
@@ -242,47 +270,75 @@ const ProductDetail = () => {
                         {/* Variant Attribute Selectors */}
                         {Object.keys(attributeGroups).length > 0 && (
                             <div className="space-y-4">
-                                {Object.entries(attributeGroups).map(([key, values]) => (
-                                    <div key={key} className="space-y-2">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b7368]">
-                                            {key}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {values.map((value) => {
-                                                const isSelected = selectedAttributes[key] === value;
-                                                const isAvailable = isAttributeValueAvailable(key, value);
-                                                return (
-                                                    <button
-                                                        key={value}
-                                                        type="button"
-                                                        onClick={() => isAvailable && handleAttributeSelect(key, value)}
-                                                        disabled={!isAvailable}
-                                                        className={`inline-flex h-9 items-center justify-center border px-3 text-[11px] font-semibold uppercase tracking-[0.12em] transition
-                                                            ${isSelected
-                                                                ? 'border-[#1f1b16] bg-[#1f1b16] text-[#f4f0e9]'
-                                                                : isAvailable
-                                                                    ? 'border-[#cbc0af] bg-transparent text-[#4f493f] hover:border-[#1f1b16] hover:text-[#1f1b16]'
-                                                                    : 'cursor-not-allowed border-[#ddd3c4] bg-transparent text-[#c0b9af] line-through opacity-50'
-                                                            }`}
-                                                    >
-                                                        {value}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
+                                    {Object.entries(attributeGroups).map(([key, group]) => {
+                                        const values = group.values || [];
+                                        const isSizeGroup = key === 'size';
+                                        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+                                        const sizeSet = new Set(values.map((value) => String(value).toUpperCase()));
+                                        const renderedValues = isSizeGroup ? sizeOrder : values;
+                                        return (
+                                            <div key={key} className="space-y-2">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b7368]">
+                                                    {group.label}
+                                                </p>
+                                                <div className={isSizeGroup ? 'grid grid-cols-6 overflow-hidden border border-[#cbc0af] text-[12px] uppercase tracking-[0.16em]' : 'flex flex-wrap gap-2'}>
+                                                    {renderedValues.map((value) => {
+                                                        const displayValue = isSizeGroup ? String(value).toUpperCase() : value;
+                                                        const isSelected = selectedAttributes[key] === value || selectedAttributes[key] === displayValue;
+                                                        const isAvailable = isSizeGroup
+                                                            ? sizeSet.has(displayValue) && isAttributeValueAvailable(key, displayValue)
+                                                            : isAttributeValueAvailable(key, value);
+                                                        const sizeButtonClass = isSizeGroup
+                                                            ? `inline-flex h-12 items-center justify-center border-r border-[#cbc0af] px-3 transition last:border-r-0 ${
+                                                                isSelected
+                                                                    ? 'bg-[#1f1b16] text-[#f4f0e9]'
+                                                                    : isAvailable
+                                                                        ? 'bg-transparent text-[#1f1b16] hover:bg-[#efe7db]'
+                                                                        : 'cursor-not-allowed bg-transparent text-[#c0b9af] line-through opacity-50'
+                                                            }`
+                                                            : `inline-flex h-9 items-center justify-center border px-3 text-[11px] font-semibold uppercase tracking-[0.12em] transition
+                                                                ${isSelected
+                                                                    ? 'border-[#1f1b16] bg-[#1f1b16] text-[#f4f0e9]'
+                                                                    : isAvailable
+                                                                        ? 'border-[#cbc0af] bg-transparent text-[#4f493f] hover:border-[#1f1b16] hover:text-[#1f1b16]'
+                                                                        : 'cursor-not-allowed border-[#ddd3c4] bg-transparent text-[#c0b9af] line-through opacity-50'
+                                                                }`;
+                                                        return (
+                                                            <button
+                                                                key={value}
+                                                                type="button"
+                                                                onClick={() => isAvailable && handleAttributeSelect(key, displayValue)}
+                                                                disabled={!isAvailable}
+                                                                className={sizeButtonClass}
+                                                            >
+                                                                {displayValue}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                             </div>
                         )}
 
                         {/* Stock */}
-                        {stockDisplay && (
-                            <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${
-                                matchedVariant?.stock > 0 ? 'text-[#4a7c59]' : 'text-red-600'
-                            }`}>
-                                {stockDisplay}
+                        <div className="space-y-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b7368]">
+                                Stock
                             </p>
-                        )}
+                            {matchedVariant ? (
+                                <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${
+                                    matchedVariant.stock > 0 ? 'text-[#4a7c59]' : 'text-red-600'
+                                }`}>
+                                    {stockDisplay}
+                                </p>
+                            ) : (
+                                <p className="text-xs text-[#6f685d]">
+                                    Select a variant to view stock availability.
+                                </p>
+                            )}
+                        </div>
 
                         {/* Description */}
                         <div>
@@ -295,17 +351,36 @@ const ProductDetail = () => {
                         {/* CTA Buttons */}
                         <div className="space-y-2">
                             <button
-                                onClick={()=>{
-                                    handleAddItem({
-                                        productId: product._id,
-                                        variantId: matchedVariant._id
-                                    })
+                                onClick={async () => {
+                                    if (!matchedVariant || addToCartState === 'loading') return;
+                                    try {
+                                        setAddToCartState('loading');
+                                        await handleAddItem({
+                                            productId: product._id,
+                                            variantId: matchedVariant._id,
+                                        });
+                                        setAddToCartState('added');
+                                        if (resetTimerRef.current) {
+                                            clearTimeout(resetTimerRef.current);
+                                        }
+                                        resetTimerRef.current = setTimeout(() => {
+                                            setAddToCartState('idle');
+                                        }, 1800);
+                                    } catch {
+                                        setAddToCartState('idle');
+                                    }
                                 }}
                                 type="button"
-                                disabled={!matchedVariant || matchedVariant.stock === 0}
-                                className="inline-flex h-12 w-full items-center justify-center border border-[#1f1b16] bg-[#1f1b16] text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-50"
+                                disabled={!matchedVariant || matchedVariant.stock === 0 || addToCartState === 'loading'}
+                                className={`inline-flex h-12 w-full items-center justify-center border text-[11px] font-semibold uppercase tracking-[0.14em] transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                                    addToCartState === 'added'
+                                        ? 'border-[#1f1b16] bg-transparent text-[#1f1b16] ring-1 ring-[#1f1b16]'
+                                        : 'border-[#1f1b16] bg-[#1f1b16] text-[#f4f0e9] hover:bg-transparent hover:text-[#1f1b16]'
+                                } ${addToCartState === 'added' ? 'animate-pulse' : ''}`}
                             >
-                                Add to Cart
+                                {addToCartState === 'loading' && 'Adding...'}
+                                {addToCartState === 'added' && 'Added to Cart'}
+                                {addToCartState === 'idle' && 'Add to Cart'}
                             </button>
                             <button
                                 type="button"

@@ -65,4 +65,38 @@ export const getCart = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Server error', success: false });
     }
-}   
+}
+
+export const removeFromCart = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+        const cart = await cartModel.findOneAndUpdate(
+            { user: req.user._id },
+            { $pull: { items: { _id: itemId } } },
+            { new: true }
+        );
+        if (!cart) return res.status(404).json({ message: 'Cart not found', success: false });
+        return res.status(200).json({ message: 'Item removed', success: true, data: cart });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', success: false });
+    }
+};
+
+export const updateCartItem = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+        const { quantity } = req.body;
+
+        const cart = await cartModel.findOneAndUpdate(
+            { user: req.user._id, 'items._id': itemId },
+            { $set: { 'items.$.quantity': quantity } },
+            { new: true }
+        );
+
+        if (!cart) return res.status(404).json({ message: 'Cart item not found', success: false });
+
+        return res.status(200).json({ message: 'Quantity updated', success: true, data: cart });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', success: false });
+    }
+};
