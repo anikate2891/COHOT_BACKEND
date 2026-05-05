@@ -91,6 +91,20 @@ export const getMeController = async (req, res, next) => {
 	}
 }
 
+export const logoutController = async (req, res) => {
+	res.clearCookie("token", {
+		httpOnly: true,
+		secure: config.NODE_ENV === "production",
+		sameSite: "lax",
+		path: "/",
+	});
+
+	return res.status(200).json({
+		message: "Logout successful.",
+		success: true,
+	});
+}
+
 export const googleCallbackController = async (req, res) => {
     const { id, emails, displayName, photos } = req.user
     const email = emails[0].value;

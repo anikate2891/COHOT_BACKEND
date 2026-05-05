@@ -7,20 +7,32 @@ import Protected from "../features/auth/components/Protected.jsx";
 import Home from "../features/products/pages/Home.jsx";
 import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails.jsx";
+import Cart from "../features/cart/pages/Cart.jsx";
+import Nav from "../features/shared/Nav.jsx";
 
 export const routes = createBrowserRouter([
-    { path: "/", element: <Home /> },
-    { path: "/login", element: <Login /> },
-    { path: "/register", element: <Register /> },
-    { path: "/product/:productId", element: <ProductDetail /> }, 
-
-    // seller routes
-    { path: "/seller",
+    {
+        path: "/",
+        element: <Nav />,
         children: [
-            { path: "/seller/create-product", element: <Protected role="seller"><Product /></Protected> },
-            { path: "/seller/dashboard", element: <Protected role="seller"><DashBoard /></Protected> },
-            { path: "/seller/product/:productId", element: <Protected role="seller"><SellerProductDetails /></Protected> }
-        ]   
+            { path: "/", element: <Home /> },
+            { path: "/login", element: <Login /> },
+            { path: "/register", element: <Register /> },
+            { path: "/product/:productId", element: <ProductDetail /> },
+            // seller routes
+            {
+                path: "/seller",
+                children: [
+                    { path: "/seller/create-product", element: <Protected role="seller"><Product /></Protected> },
+                    { path: "/seller/dashboard", element: <Protected role="seller"><DashBoard /></Protected> },
+                    { path: "/seller/product/:productId", element: <Protected role="seller"><SellerProductDetails /></Protected> }
+                ]
+            },
+            {
+                path: "/cart",
+                element: <Protected role="buyer"><Cart /></Protected>
+            }
+        ]
     }
-    
+
 ]);

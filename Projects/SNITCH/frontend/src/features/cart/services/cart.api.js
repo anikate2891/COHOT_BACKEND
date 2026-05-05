@@ -5,11 +5,25 @@ const cartApi = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, 
+    withCredentials: true,
 });
 
-export const addItem = async ({productId, variantId}) => {
-    const response = await cartApi.post(`/add/${productId}/${variantId}`, {quantity: 1});
+export const addItem = async ({ productId, variantId }) => {
+    const response = await cartApi.post(`/add/${productId}/${variantId}`, { quantity: 1 });
     return response.data;
 };
-    
+
+export const getCartItems = async () => {
+    const response = await cartApi.get(`/`);
+    return response.data;
+};
+
+export const removeItem = async ({ cartItemId }) => {
+    const response = await cartApi.delete(`/remove/${cartItemId}`);
+    return response.data;
+};
+
+export const updateQuantity = async ({ cartItemId, quantity }) => {
+    const response = await cartApi.patch(`/update/${cartItemId}`, { quantity });
+    return response.data;
+};

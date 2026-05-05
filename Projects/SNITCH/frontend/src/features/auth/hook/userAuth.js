@@ -1,41 +1,65 @@
-import {setUser, setLoading, setError } from '../state/auth.Slice.js';
-import { registerUser, loginUser, getMe } from '../services/auth.api.js';
+import { setUser, setLoading, setError } from '../state/auth.Slice.js';
+import { registerUser, loginUser, getMe, logoutUser } from '../services/auth.api.js';
 import { useDispatch } from 'react-redux';
-
+import { useCallback } from 'react'; // ✅ add this
 
 export const useUserAuth = () => {
     const dispatch = useDispatch();
 
-    async function handleRegister({email, password, contact, fullname, isseller = false}) {
-        try { 
+    const handleRegister = useCallback(async ({ email, password, contact, fullname, isseller = false }) => {
+        try {
             dispatch(setLoading(true));
-            const data = await registerUser({email, password, contact, fullname, isseller});
+            const data = await registerUser({ email, password, contact, fullname, isseller });
             dispatch(setUser(data.user));
             return data.user;
         } catch (error) {
-            dispatch(setError('User Registration', error.message));
+            dispatch(setError(error.message));
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleLogin({email, password}) {
-        const data = await loginUser({email, password});
-        dispatch(setUser(data.user));
-        return data.user;
-    }
-
-    async function handelGetMe() {
+    const handleLogin = useCallback(async ({ email, password }) => {
         try {
             dispatch(setLoading(true));
-            const data = await getMe();
+            const data = await loginUser({ email, password });
             dispatch(setUser(data.user));
+            return data.user;
         } catch (error) {
-            dispatch(setError('Fetching User Details', error.message));
+            dispatch(setError(error.message));
+            throw error;
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    return { handleRegister, handleLogin, handelGetMe };
-}   
+    const handelGetMe = useCallback(async () => {
+        try {
+            dispatch(setLoading(true));
+            console.log("getMe calling..."); // ✅
+            const data = await getMe();
+            console.log("getMe response:", data); // ✅
+            dispatch(setUser(data.user));
+        } catch (error) {
+            console.log("getMe ERROR:", error); // ✅
+            dispatch(setError(error.message));
+        } finally {
+            dispatch(setLoading(false));
+            console.log("setLoading(false) called"); // ✅
+        }
+    }, [dispatch]);
+
+    const handleLogout = useCallback(async () => {
+        try {
+            dispatch(setLoading(true));
+            await logoutUser();
+            dispatch(setUser(null));
+        } catch (error) {
+            dispatch(setError(error.message));
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }, [dispatch]);
+
+    return { handleRegister, handleLogin, handelGetMe, handleLogout };
+}

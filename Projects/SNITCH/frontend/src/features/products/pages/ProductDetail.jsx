@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useProduct } from '../hook/useProduct.js';
-import { Link } from 'react-router-dom';
 import Loader from '../../auth/components/Loader.jsx';
 import { useCart } from '../../cart/hook/useCart.js';
 
@@ -158,18 +157,6 @@ const ProductDetail = () => {
     return (
         <main className="min-h-screen bg-[#f4f0e9] px-5 py-8 text-[#1f1b16] sm:px-8 lg:px-10">
             <div className="mx-auto max-w-7xl">
-                <header className="mb-8 flex items-center justify-between border-b border-[#ddd3c4] pb-4">
-                    <p className="text-[28px] tracking-[0.12em]" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-                        SNITCH.
-                    </p>
-                    <Link
-                        to="/"
-                        className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5f584e] transition hover:text-[#1f1b16]"
-                    >
-                        Back to Store
-                    </Link>
-                </header>
-
                 <section className="grid gap-8 lg:grid-cols-[0.78fr_0.92fr] lg:gap-12">
                     {/* Images */}
                     <div className="mx-auto w-full max-w-lg lg:mx-0 lg:max-w-md">

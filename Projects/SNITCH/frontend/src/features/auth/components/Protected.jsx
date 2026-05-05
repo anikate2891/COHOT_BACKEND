@@ -7,20 +7,16 @@ const Protected = ({ children, role = "buyer" }) => {
     const user = useSelector((state) => state.auth.user);
     const loading = useSelector((state) => state.auth.loading);
 
-    if (loading) {
-        return <Loader />;
-    }
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    } 
+    if (loading) return <Loader />;
+    if (!user) return <Navigate to="/login" replace />;
 
-    if (user.role !== role) {
-        return <Navigate to="/" replace />;
-    }
+    // ✅ Ab user guaranteed exist karta hai
+    console.log("user role:", user.role);
+    console.log("role type:", typeof user.role);
+
+    if (user.role !== role) return <Navigate to="/" replace />;
 
     return children;
-        
-
 }
 
 export default Protected

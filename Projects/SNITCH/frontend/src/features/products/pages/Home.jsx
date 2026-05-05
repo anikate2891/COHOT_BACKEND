@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useProduct } from '../hook/useProduct.js';
-import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../auth/components/Loader.jsx';
 
 const Home = () => {
-        const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const allProducts = useSelector((state) => state.product.allProducts);
-    const user = useSelector((state) => state.auth.user);
-    const authLoading = useSelector((state) => state.auth.loading);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -61,34 +58,6 @@ const Home = () => {
     return (
         <main className="min-h-screen bg-[#f4f0e9] text-[#1f1b16]">
             <div className="mx-auto max-w-350 px-5 py-8 sm:px-8 lg:px-10">
-                <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ddd3c4] pb-6">
-                    <div className="flex items-center gap-8">
-                        <p className="text-[28px] tracking-[0.12em]" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-                            SNITCH.
-                        </p>
-                        <div className="hidden items-center gap-6 text-[11px] uppercase tracking-[0.14em] text-[#615a4f] md:flex">
-                            <span>Collections</span>
-                            <span>New Arrivals</span>
-                            <span>Atelier</span>
-                        </div>
-                    </div>
-
-                    {!authLoading && !user && (
-                        <Link
-                            to="/login"
-                            className="inline-flex h-10 items-center justify-center border border-[#1f1b16] px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1f1b16] transition hover:bg-[#1f1b16] hover:text-[#f4f0e9]"
-                        >
-                            Login
-                        </Link>
-                    )}
-
-                    {!authLoading && user && (
-                        <div className="inline-flex h-10 items-center justify-center border border-[#cfc4b4] bg-[#eee7da] px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3b352d]">
-                            {user.fullname || user.email}
-                        </div>
-                    )}
-                </header>
-
                 <section className="mt-8">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-[#7f776b]">Atelier Selections</p>
                     <div className="mt-3 flex flex-wrap items-end justify-between gap-4">

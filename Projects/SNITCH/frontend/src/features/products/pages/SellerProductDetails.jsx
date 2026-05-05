@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useProduct } from '../hook/useProduct'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import Loader from '../../auth/components/Loader.jsx';
 
 const baseInput =
     'h-11 w-full rounded-lg border border-[#d7cebf] bg-[#f8f4ec] px-3 text-sm text-[#1f1b16] outline-none transition focus:border-[#1f1b16] focus:ring-2 focus:ring-[#1f1b16]/10';
 
 const SellerProductDetails = () => {
-    const navigate = useNavigate();
     const { productId } = useParams();
     const {
         handelGetProductDetails,
@@ -286,24 +285,6 @@ const SellerProductDetails = () => {
     return (
         <main className="min-h-screen bg-[#f4f0e9] px-4 py-5 text-[#1f1b16] sm:px-8 sm:py-8 lg:px-10 lg:py-10">
             <div className="mx-auto max-w-6xl space-y-9">
-                <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ddd3c4] pb-5">
-                    <div className="flex items-center gap-5">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/seller/dashboard')}
-                            className="inline-flex h-9 items-center justify-center border border-[#cbc0af] px-3 text-xs uppercase tracking-[0.14em] text-[#6f685d] transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
-                        >
-                            Back
-                        </button>
-                        <p className="text-[26px] tracking-[0.12em]" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-                            SNITCH.
-                        </p>
-                    </div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-[#6f685d]">
-                        {product.variants?.length || 0} variant{(product.variants?.length || 0) === 1 ? '' : 's'}
-                    </p>
-                </header>
-
                 <section className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
                     <div className="space-y-4">
                         <div className="overflow-hidden border border-[#ddd3c4] bg-[#e5dacb]">

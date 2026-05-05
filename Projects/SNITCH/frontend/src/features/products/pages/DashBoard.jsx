@@ -79,26 +79,6 @@ const DashBoard = () => {
                 </aside>
 
                 <section className="p-5 sm:p-8 lg:p-10">
-                    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ddd3c4] pb-6">
-                        <div className="flex items-center gap-8">
-                            <p className="text-[28px] tracking-[0.12em]" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-                                SNITCH.
-                            </p>
-                            <div className="hidden items-center gap-6 text-[11px] uppercase tracking-[0.14em] text-[#615a4f] md:flex">
-                                <span>Collections</span>
-                                <span>Archive</span>
-                                <span>Atelier</span>
-                            </div>
-                        </div>
-
-                        <Link
-                            to="/seller/create-product"
-                            className="inline-flex h-10 items-center justify-center border border-[#1f1b16] bg-[#1f1b16] px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]"
-                        >
-                            Create Product
-                        </Link>
-                    </header>
-
                     <div className="mt-8">
                         <p className="text-[11px] uppercase tracking-[0.18em] text-[#7f776b]">Atelier Selections</p>
                         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
