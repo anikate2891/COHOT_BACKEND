@@ -5,6 +5,7 @@ import cookie from 'cookie-parser';
 import authRouter from './routes/user.route.js';
 import productRouter from './routes/product.route.js';
 import { config } from './config/config.js';
+import cartRouter from './routes/cart.route.js';
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -33,6 +34,11 @@ app.use(cookie());
 
 app.use('/api/auth', authRouter);   
 app.use('/api/products', productRouter);
+app.use('/api/cart', cartRouter);
+
+app.get('/', (req, res) => {
+    res.send('Welcome to the E-commerce API');
+});
 
 export default app;
 

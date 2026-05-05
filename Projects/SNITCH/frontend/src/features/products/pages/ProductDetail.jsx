@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useProduct } from '../hook/useProduct.js';
 import { Link } from 'react-router-dom';
 import Loader from '../../auth/components/Loader.jsx';
+import { useCart } from '../../cart/hook/useCart.js';
 
 const ProductDetail = () => {
     const { productId } = useParams();
@@ -11,6 +12,7 @@ const ProductDetail = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedAttributes, setSelectedAttributes] = useState({});
+    const { handleAddItem } = useCart();
 
     const { handelGetProductDetails } = useProduct();
 
@@ -306,6 +308,12 @@ const ProductDetail = () => {
                         {/* CTA Buttons */}
                         <div className="space-y-2">
                             <button
+                                onClick={()=>{
+                                    handleAddItem({
+                                        productId: product._id,
+                                        variantId: matchedVariant._id
+                                    })
+                                }}
                                 type="button"
                                 disabled={!matchedVariant || matchedVariant.stock === 0}
                                 className="inline-flex h-12 w-full items-center justify-center border border-[#1f1b16] bg-[#1f1b16] text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-50"
