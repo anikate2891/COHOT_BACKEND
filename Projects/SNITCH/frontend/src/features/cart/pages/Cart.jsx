@@ -25,6 +25,12 @@ const Cart = () => {
         return item.product.variants.find((v) => v._id === item.variant);
     };
 
+    const getCurrentPrice = (item, variant) => {
+        if (variant?.price) return variant.price;
+        if (item?.product?.price) return item.product.price;
+        return item?.price ?? null;
+    };
+
     const suggestions = useMemo(() => {
         if (!cartitems?.length) return [];
 
@@ -85,6 +91,12 @@ const Cart = () => {
                                     const size = variant?.attributes?.Size || 'N/A';
                                     const color = variant?.attributes?.color || 'N/A';
                                     const stock = variant?.stock || 0;
+                                    const currentPrice = getCurrentPrice(item, variant);
+                                    const currentAmount = currentPrice?.amount ?? null;
+                                    const itemAmount = item.price?.amount ?? null;
+                                    const priceDelta = (currentAmount != null && itemAmount != null)
+                                        ? currentAmount - itemAmount
+                                        : null;
 
                                     return (
                                         <div key={item._id} className="grid grid-cols-[120px_1fr] gap-6 border-b border-[#d7cebf] pb-10 sm:grid-cols-[160px_1fr]">
@@ -121,6 +133,14 @@ const Cart = () => {
                                                         {item.price?.currency ?? 'INR'} {item.price?.amount?.toLocaleString() ?? 0}
                                                     </div>
                                                 </div>
+
+                                                {priceDelta !== null && priceDelta !== 0 && (
+                                                    <div
+                                                        className={`mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] ${priceDelta > 0 ? 'text-red-600' : 'text-green-600'}`}
+                                                    >
+                                                        Price {priceDelta > 0 ? 'increased' : 'decreased'} by {item.price?.currency ?? currentPrice?.currency ?? 'INR'} {Math.abs(priceDelta).toLocaleString()}
+                                                    </div>
+                                                )}
 
                                                 <div className="mt-auto flex items-end justify-between pt-6">
                                                     {/* Quantity Control */}
