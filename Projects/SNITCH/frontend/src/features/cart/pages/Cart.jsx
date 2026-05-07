@@ -2,15 +2,45 @@ import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useGetCartItems, useCart } from "../hook/useCart.js";
 import { Link } from "react-router-dom";
+import { useRazorpay } from "react-razorpay";
 
 const Cart = () => {
+    const { error, isLoading, Razorpay } = useRazorpay();
+
     const cartitems = useSelector((state) => state.cart.items);
     const { handleGetCartItems } = useGetCartItems();
     const { handleRemoveItem, handleUpdateQuantity } = useCart();
 
+
     useEffect(() => {
         handleGetCartItems();
     }, []);
+
+     const handlePayment = () => {
+    const options = {
+      key: "YOUR_RAZORPAY_KEY",
+      amount: 50000, // Amount in paise
+      currency: "INR",
+      name: "Test Company",
+      description: "Test Transaction",
+      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
+      handler: (response) => {
+        console.log(response);
+        alert("Payment Successful!");
+      },
+      prefill: {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        contact: "9999999999",
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  };
 
     const totalPrice = useSelector((state) => state.cart.totalPrice);
     const currency = useSelector((state) => state.cart.currency);
@@ -248,9 +278,10 @@ const Cart = () => {
                             </div>
 
                             <div className="space-y-3 pt-2">
-                                <button className="h-12 w-full border border-[#1f1b16] bg-[#1f1b16] text-xs font-semibold uppercase tracking-[0.2em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]">
+                                <button onClick={handlePayment}
+                                className="h-12 w-full border border-[#1f1b16] bg-[#1f1b16] text-xs font-semibold uppercase tracking-[0.2em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]">
                                     Proceed to Checkout
-                                </button>
+                                </button >
                                 <Link to="/" className="flex h-12 w-full items-center justify-center border border-[#d7cebf] bg-transparent text-xs font-semibold uppercase tracking-[0.2em] text-[#1f1b16] transition hover:bg-[#eae4d9]">
                                     Continue Shopping
                                 </Link>
