@@ -11,6 +11,9 @@ const Home = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const categories = ['All', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
+
     const { handelGetAllProducts } = useProduct();
 
     useEffect(() => {
@@ -54,6 +57,9 @@ const Home = () => {
             year: 'numeric',
         });
     }
+    const filteredProducts = selectedCategory === 'All'
+    ? allProducts
+    : allProducts.filter(p => p.category === selectedCategory);
 
     return (
         <main className="min-h-screen bg-[#f4f0e9] text-[#1f1b16]">
@@ -79,6 +85,22 @@ const Home = () => {
                     <span>Showing all products</span>
                 </div>
 
+                <div className="mt-4 flex flex-wrap gap-2">
+                    {categories.map(cat => (
+                        <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-4 py-1.5 text-[11px] uppercase tracking-[0.14em] border transition-all
+                            ${selectedCategory === cat
+                            ? 'bg-[#1f1b16] text-[#f4f0e9] border-[#1f1b16]'
+                            : 'bg-transparent text-[#655f56] border-[#ddd3c4] hover:border-[#1f1b16]'
+                            }`}
+                        >
+                        {cat}
+                        </button>
+                    ))}
+                </div>
+
                 {isLoading && (
                     <div className="mt-8 border border-[#d9cebe] bg-[#eee7da] p-5 text-sm text-[#3f3930]">
                         <Loader/>
@@ -97,9 +119,9 @@ const Home = () => {
                     </div>
                 )}
 
-                {!isLoading && !errorMessage && allProducts.length > 0 && (
+                {!isLoading && !errorMessage && filteredProducts.length > 0 && (
                     <div className="mt-8 grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {allProducts.map((product) => {
+                        {filteredProducts.map((product) => {
                             const imageUrl = product?.images?.[0]?.url;
                             return (
                                 <article

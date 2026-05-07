@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';    
 import {authenticateSeller} from "../middleware/auth.middleware.js";
-import {createProductController, getAllProductsController, getProductDetailsController , getSellerProductsController,  addProductVariantController, updateProductVariantStockController, deleteProductVariantController } from "../controller/product.controller.js";
+import {createProductController, getAllProductsController, getProductDetailsController , getSellerProductsController,  addProductVariantController, updateProductVariantStockController, deleteProductVariantController, deleteProductController, updateProductVariantController, updateProductImagesController } from "../controller/product.controller.js";
 import {validateProduct} from "../validator/product.validator.js";
 import { get } from 'mongoose';
 
@@ -43,8 +43,11 @@ productRouter.get('/detail/:id', getProductDetailsController);
 
 
 productRouter.post('/:productId/variants', authenticateSeller, upload.array('image', 7), addProductVariantController);
+productRouter.patch('/:productId/variants/:variantId', authenticateSeller, upload.array('image', 7), updateProductVariantController);
 productRouter.patch('/:productId/variants/:variantId/stock', authenticateSeller, updateProductVariantStockController);
 productRouter.delete('/:productId/variants/:variantId', authenticateSeller, deleteProductVariantController);
+productRouter.patch('/:productId/images', authenticateSeller, upload.array('image', 7), updateProductImagesController);
+productRouter.delete('/:productId', authenticateSeller, deleteProductController);
 
 
 

@@ -65,12 +65,42 @@ export async function updateProductVariantStock(productId, variantId, stock) {
     }
 }
 
+export async function updateProductVariant(productId, variantId, variantData) {
+    try {
+        const response = await productApi.patch(`/${productId}/variants/${variantId}`, variantData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating product variant:', error);
+        throw error;
+    }
+}
+
+export async function updateProductImages(productId, imageData) {
+    try {
+        const response = await productApi.patch(`/${productId}/images`, imageData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating product images:', error);
+        throw error;
+    }
+}
+
 export async function deleteProductVariant(productId, variantId) {
     try {
         const response = await productApi.delete(`/${productId}/variants/${variantId}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting product variant:', error);
+        throw error;
+    }
+}
+
+export async function deleteProduct(productId) {
+    try {
+        const response = await productApi.delete(`/${productId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting product:', error);
         throw error;
     }
 }

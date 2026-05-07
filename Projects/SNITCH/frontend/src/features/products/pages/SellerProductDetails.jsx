@@ -6,12 +6,16 @@ import Loader from '../../auth/components/Loader.jsx';
 const baseInput =
     'h-11 w-full rounded-lg border border-[#d7cebf] bg-[#f8f4ec] px-3 text-sm text-[#1f1b16] outline-none transition focus:border-[#1f1b16] focus:ring-2 focus:ring-[#1f1b16]/10';
 
+const colorOptions = ['Black', 'White', 'Brown', 'Beige', 'Blue', 'Green', 'Red', 'Grey', 'Yellow'];
+
 const SellerProductDetails = () => {
     const { productId } = useParams();
     const {
         handelGetProductDetails,
         handelCreateProductVariant,
         handelUpdateProductVariantStock,
+        handelUpdateProductVariant,
+        handelUpdateProductImages,
         handelDeleteProductVariant,
     } = useProduct();
 
@@ -27,16 +31,39 @@ const SellerProductDetails = () => {
     const [pendingDeleteVariantId, setPendingDeleteVariantId] = useState('');
     const [isVariantPanelOpen, setIsVariantPanelOpen] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [editingVariantId, setEditingVariantId] = useState('');
+    const [editingVariant, setEditingVariant] = useState(null);
+    const [isUpdatingVariant, setIsUpdatingVariant] = useState(false);
+    const [editVariantImageDrafts, setEditVariantImageDrafts] = useState([]);
+    const [isEditingImages, setIsEditingImages] = useState(false);
+    const [isUpdatingImages, setIsUpdatingImages] = useState(false);
+    const [imageDrafts, setImageDrafts] = useState([]);
+    const [newImageFiles, setNewImageFiles] = useState([]);
+    const [imageFilePreviews, setImageFilePreviews] = useState([]);
     const variantImageInputRef = useRef(null);
+    const editImageInputRef = useRef(null);
+    const productImageInputRef = useRef(null);
 
     const [variantForm, setVariantForm] = useState({
         stock: 0,
         priceAmount: '',
         priceCurrency: 'INR',
         color: '',
+        colorCustom: '',
         attributes: [{ key: '', value: '' }],
         imageFiles: [],
     });
+
+    const [editVariantForm, setEditVariantForm] = useState({
+        stock: 0,
+        priceAmount: '',
+        priceCurrency: 'INR',
+        color: '',
+        colorCustom: '',
+        attributes: [{ id: crypto.randomUUID(), key: '', value: '' }],
+        imageFiles: [],
+    });
+    const [editImagePreviews, setEditImagePreviews] = useState([]);
 
     const productImages = useMemo(() => product?.images || [], [product]);
     const selectedImage = productImages[selectedImageIndex]?.url;
@@ -67,6 +94,7 @@ const SellerProductDetails = () => {
                     priceCurrency: data?.price?.currency || 'INR',
                     priceAmount: '',
                     color: '',
+                    colorCustom: '',
                 }));
                 seedStockDrafts(data?.variants || []);
                 setSelectedImageIndex(0);
@@ -93,6 +121,30 @@ const SellerProductDetails = () => {
         };
     }, [variantForm.imageFiles]);
 
+    useEffect(() => {
+        const previews = (editVariantForm.imageFiles || []).map((file) => ({
+            key: `${file.name}-${file.lastModified}`,
+            url: URL.createObjectURL(file),
+        }));
+        setEditImagePreviews(previews);
+
+        return () => {
+            previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+        };
+    }, [editVariantForm.imageFiles]);
+
+    useEffect(() => {
+        const previews = (newImageFiles || []).map((file) => ({
+            key: `${file.name}-${file.lastModified}`,
+            url: URL.createObjectURL(file),
+        }));
+        setImageFilePreviews(previews);
+
+        return () => {
+            previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+        };
+    }, [newImageFiles]);
+
     function updateAttributeRow(index, field, value) {
         setVariantForm((prev) => {
             const nextAttributes = [...prev.attributes];
@@ -112,6 +164,33 @@ const SellerProductDetails = () => {
         setVariantForm((prev) => {
             if (prev.attributes.length === 1) {
                 return { ...prev, attributes: [{ key: '', value: '' }] };
+            }
+            return {
+                ...prev,
+                attributes: prev.attributes.filter((_, currentIndex) => currentIndex !== index),
+            };
+        });
+    }
+
+    function updateEditAttributeRow(index, field, value) {
+        setEditVariantForm((prev) => {
+            const nextAttributes = [...prev.attributes];
+            nextAttributes[index] = { ...nextAttributes[index], [field]: value };
+            return { ...prev, attributes: nextAttributes };
+        });
+    }
+
+    function addEditAttributeRow() {
+        setEditVariantForm((prev) => ({
+            ...prev,
+            attributes: [...prev.attributes, { id: crypto.randomUUID(), key: '', value: '' }],
+        }));
+    }
+
+    function removeEditAttributeRow(index) {
+        setEditVariantForm((prev) => {
+            if (prev.attributes.length === 1) {
+                return { ...prev, attributes: [{ id: crypto.randomUUID(), key: '', value: '' }] };
             }
             return {
                 ...prev,
@@ -145,6 +224,125 @@ const SellerProductDetails = () => {
         }));
     }
 
+    function handleEditImageSelect(event) {
+        const incomingFiles = Array.from(event.target.files || []);
+        if (incomingFiles.length === 0) return;
+
+        setEditVariantForm((prev) => {
+            const mergedFiles = [...prev.imageFiles, ...incomingFiles].slice(0, 7);
+            return { ...prev, imageFiles: mergedFiles };
+        });
+
+        if (incomingFiles.length > 7) {
+            setSubmitMessage('You can upload up to 7 variant images.');
+        }
+
+        if (editImageInputRef.current) {
+            editImageInputRef.current.value = '';
+        }
+    }
+
+    function removeEditImage(index) {
+        setEditVariantForm((prev) => ({
+            ...prev,
+            imageFiles: prev.imageFiles.filter((_, imageIndex) => imageIndex !== index),
+        }));
+    }
+
+    function openEditVariant(variant) {
+        const entries = Object.entries(variant.attributes || {});
+        let colorValue = '';
+        const attributeRows = [];
+
+        entries.forEach(([key, value]) => {
+            if (key.toLowerCase() === 'color') {
+                colorValue = value;
+                return;
+            }
+            attributeRows.push({ id: crypto.randomUUID(), key, value });
+        });
+
+        if (attributeRows.length === 0) {
+            attributeRows.push({ id: crypto.randomUUID(), key: '', value: '' });
+        }
+
+        const isListedColor = colorOptions.includes(colorValue);
+
+        setEditVariantForm({
+            stock: variant.stock ?? 0,
+            priceAmount: variant.price?.amount ?? '',
+            priceCurrency: variant.price?.currency || 'INR',
+            color: colorValue ? (isListedColor ? colorValue : 'Other') : '',
+            colorCustom: colorValue && !isListedColor ? colorValue : '',
+            attributes: attributeRows,
+            imageFiles: [],
+        });
+        setEditVariantImageDrafts((variant.images || []).map((image) => ({
+            id: image._id || crypto.randomUUID(),
+            url: image.url,
+        })));
+        setEditingVariantId(variant._id);
+        setEditingVariant(variant);
+        setSubmitMessage('');
+    }
+
+    function closeEditVariant() {
+        setEditingVariantId('');
+        setEditingVariant(null);
+        setEditVariantImageDrafts([]);
+        setEditVariantForm({
+            stock: 0,
+            priceAmount: '',
+            priceCurrency: product?.price?.currency || 'INR',
+            color: '',
+            colorCustom: '',
+            attributes: [{ id: crypto.randomUUID(), key: '', value: '' }],
+            imageFiles: [],
+        });
+        if (editImageInputRef.current) {
+            editImageInputRef.current.value = '';
+        }
+    }
+
+    function removeEditVariantDraftImage(id) {
+        setEditVariantImageDrafts((prev) => prev.filter((image) => image.id !== id));
+    }
+
+    function openImageEditor() {
+        setImageDrafts(productImages.map((image) => ({ id: image._id || crypto.randomUUID(), url: image.url })));
+        setNewImageFiles([]);
+        setIsEditingImages(true);
+        setSubmitMessage('');
+    }
+
+    function closeImageEditor() {
+        setIsEditingImages(false);
+        setImageDrafts([]);
+        setNewImageFiles([]);
+        if (productImageInputRef.current) {
+            productImageInputRef.current.value = '';
+        }
+    }
+
+    function removeDraftImage(id) {
+        setImageDrafts((prev) => prev.filter((image) => image.id !== id));
+    }
+
+    function handleProductImageSelect(event) {
+        const incomingFiles = Array.from(event.target.files || []);
+        if (incomingFiles.length === 0) return;
+
+        setNewImageFiles((prev) => [...prev, ...incomingFiles].slice(0, 7));
+
+        if (productImageInputRef.current) {
+            productImageInputRef.current.value = '';
+        }
+    }
+
+    function removeNewImage(index) {
+        setNewImageFiles((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+    }
+
     async function handleCreateVariant(event) {
         event.preventDefault();
         setSubmitMessage('');
@@ -158,8 +356,12 @@ const SellerProductDetails = () => {
             return acc;
         }, {});
 
-        if (variantForm.color.trim()) {
-            normalizedAttributes.color = variantForm.color.trim();
+        const colorValue = variantForm.color === 'Other'
+            ? variantForm.colorCustom.trim()
+            : variantForm.color.trim();
+
+        if (colorValue) {
+            normalizedAttributes.color = colorValue;
         }
 
         if (Object.keys(normalizedAttributes).length === 0) {
@@ -193,6 +395,7 @@ const SellerProductDetails = () => {
                 priceAmount: '',
                 priceCurrency: product?.price?.currency || 'INR',
                 color: '',
+                colorCustom: '',
                 attributes: [{ key: '', value: '' }],
                 imageFiles: [],
             });
@@ -262,6 +465,108 @@ const SellerProductDetails = () => {
         }
     }
 
+    async function handleUpdateVariant(event) {
+        event.preventDefault();
+        setSubmitMessage('');
+
+        const totalImages = editVariantImageDrafts.length + editVariantForm.imageFiles.length;
+        if (totalImages === 0) {
+            setSubmitMessage('Please keep or upload at least one image.');
+            return;
+        }
+
+        if (totalImages > 7) {
+            setSubmitMessage('You can upload a maximum of 7 images.');
+            return;
+        }
+
+        const normalizedAttributes = editVariantForm.attributes.reduce((acc, entry) => {
+            const key = entry.key.trim();
+            const value = entry.value.trim();
+            if (key && value) {
+                acc[key] = value;
+            }
+            return acc;
+        }, {});
+
+        const colorValue = editVariantForm.color === 'Other'
+            ? editVariantForm.colorCustom.trim()
+            : editVariantForm.color.trim();
+
+        if (colorValue) {
+            normalizedAttributes.color = colorValue;
+        }
+
+        try {
+            setIsUpdatingVariant(true);
+            const payload = new FormData();
+            payload.append('stock', String(editVariantForm.stock ?? 0));
+            payload.append('priceCurrency', editVariantForm.priceCurrency);
+            payload.append('attributes', JSON.stringify(normalizedAttributes));
+            payload.append('existingImages', JSON.stringify(editVariantImageDrafts.map((image) => ({ url: image.url }))));
+
+            if (String(editVariantForm.priceAmount).trim() !== '') {
+                payload.append('priceAmount', String(editVariantForm.priceAmount));
+            }
+
+            editVariantForm.imageFiles.forEach((file) => payload.append('image', file));
+
+            const updatedVariant = await handelUpdateProductVariant(productId, editingVariantId, payload);
+
+            setProduct((prev) => ({
+                ...prev,
+                variants: (prev?.variants || []).map((variant) =>
+                    variant._id === updatedVariant._id ? updatedVariant : variant
+                ),
+            }));
+
+            closeEditVariant();
+            setSubmitMessage('Variant updated successfully.');
+        } catch (error) {
+            const apiMessage = error?.response?.data?.message;
+            setSubmitMessage(apiMessage || 'Unable to update variant.');
+        } finally {
+            setIsUpdatingVariant(false);
+        }
+    }
+
+    async function handleUpdateImages(event) {
+        event.preventDefault();
+        setSubmitMessage('');
+
+        const totalImages = imageDrafts.length + newImageFiles.length;
+        if (totalImages === 0) {
+            setSubmitMessage('Please keep or upload at least one image.');
+            return;
+        }
+
+        if (totalImages > 7) {
+            setSubmitMessage('You can upload a maximum of 7 images.');
+            return;
+        }
+
+        try {
+            setIsUpdatingImages(true);
+            const payload = new FormData();
+            payload.append('existingImages', JSON.stringify(imageDrafts.map((image) => ({ url: image.url }))));
+            newImageFiles.forEach((file) => payload.append('image', file));
+
+            const updatedImages = await handelUpdateProductImages(productId, payload);
+            setProduct((prev) => ({
+                ...prev,
+                images: updatedImages,
+            }));
+            setSelectedImageIndex(0);
+            closeImageEditor();
+            setSubmitMessage('Product images updated successfully.');
+        } catch (error) {
+            const apiMessage = error?.response?.data?.message;
+            setSubmitMessage(apiMessage || 'Unable to update product images.');
+        } finally {
+            setIsUpdatingImages(false);
+        }
+    }
+
     if (isLoading) {
         return (
             <main className="min-h-screen bg-[#f4f0e9] p-5 text-[#1f1b16] sm:p-8 lg:p-10">
@@ -319,12 +624,20 @@ const SellerProductDetails = () => {
                                 </button>
                             ))}
                         </div>
+
                     </div>
 
                     <div className="space-y-4">
                         <h1 className="text-4xl leading-tight sm:text-5xl" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
                             {product.title}
                         </h1>
+                        <button
+                            type="button"
+                            onClick={openImageEditor}
+                            className="inline-flex h-9 items-center justify-center border border-[#1f1b16] bg-[#1f1b16] px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]"
+                        >
+                            Update Images
+                        </button>
                         <p className="text-sm text-[#4b4438]">{product.description}</p>
                         <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#4f493f]">
                             Base Price: {getDisplayPrice(product.price)}
@@ -357,7 +670,13 @@ const SellerProductDetails = () => {
                                                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Color</span>
                                                 <select
                                                     value={variantForm.color}
-                                                    onChange={(event) => setVariantForm((prev) => ({ ...prev, color: event.target.value }))}
+                                                    onChange={(event) =>
+                                                        setVariantForm((prev) => ({
+                                                            ...prev,
+                                                            color: event.target.value,
+                                                            colorCustom: event.target.value === 'Other' ? prev.colorCustom : '',
+                                                        }))
+                                                    }
                                                     className={baseInput}
                                                 >
                                                     <option value="">Select color</option>
@@ -370,7 +689,17 @@ const SellerProductDetails = () => {
                                                     <option value="Red">Red</option>
                                                     <option value="Grey">Grey</option>
                                                     <option value="Yellow">Yellow</option>
+                                                    <option value="Other">Other</option>
                                                 </select>
+                                                {variantForm.color === 'Other' && (
+                                                    <input
+                                                        type="text"
+                                                        value={variantForm.colorCustom}
+                                                        onChange={(event) => setVariantForm((prev) => ({ ...prev, colorCustom: event.target.value }))}
+                                                        placeholder="Enter custom color"
+                                                        className={baseInput}
+                                                    />
+                                                )}
                                                 <p className="text-[11px] text-[#8d8477]">Stored in variant attributes as <span className="font-semibold">color</span>.</p>
                                             </div>
 
@@ -570,6 +899,19 @@ const SellerProductDetails = () => {
 
                                         <button
                                             type="button"
+                                            onClick={() => openEditVariant(variant)}
+                                            aria-label="Edit variant"
+                                            title="Edit variant"
+                                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#1f1b16] text-[#1f1b16] transition hover:bg-[#1f1b16] hover:text-[#f4f0e9]"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                                            </svg>
+                                        </button>
+
+                                        <button
+                                            type="button"
                                             onClick={() => handleDeleteVariant(variant._id)}
                                             disabled={deletingVariantId === variant._id}
                                             aria-label="Delete variant"
@@ -608,6 +950,309 @@ const SellerProductDetails = () => {
                     </div>
                 </section>
             </div>
+
+            {editingVariantId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-2xl rounded-xl border border-[#d7cebf] bg-[#f8f4ec] p-5 shadow-xl">
+                        <h3 className="text-lg font-semibold" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+                            Update Variant
+                        </h3>
+                        <p className="mt-2 text-sm text-[#5f584d]">
+                            Update variant attributes, pricing, stock, and images. Uploading images replaces existing ones.
+                        </p>
+
+                        <form onSubmit={handleUpdateVariant} className="mt-4 space-y-4">
+                            <div className="grid gap-5 lg:grid-cols-2">
+                                <div className="space-y-3">
+                                    <div className="space-y-1.5">
+                                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Color</span>
+                                        <select
+                                            value={editVariantForm.color}
+                                            onChange={(event) =>
+                                                setEditVariantForm((prev) => ({
+                                                    ...prev,
+                                                    color: event.target.value,
+                                                    colorCustom: event.target.value === 'Other' ? prev.colorCustom : '',
+                                                }))
+                                            }
+                                            className={baseInput}
+                                        >
+                                            <option value="">Select color</option>
+                                            {colorOptions.map((option) => (
+                                                <option key={option} value={option}>{option}</option>
+                                            ))}
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        {editVariantForm.color === 'Other' && (
+                                            <input
+                                                type="text"
+                                                value={editVariantForm.colorCustom}
+                                                onChange={(event) => setEditVariantForm((prev) => ({ ...prev, colorCustom: event.target.value }))}
+                                                placeholder="Enter custom color"
+                                                className={baseInput}
+                                            />
+                                        )}
+                                        <p className="text-[11px] text-[#8d8477]">Stored in variant attributes as <span className="font-semibold">color</span>.</p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Attributes</p>
+                                        <button
+                                            type="button"
+                                            onClick={addEditAttributeRow}
+                                            className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5e564a] transition hover:text-[#1f1b16]"
+                                        >
+                                            + Add Attribute
+                                        </button>
+                                    </div>
+
+                                    {editVariantForm.attributes.map((attribute, index) => (
+                                        <div key={attribute.id} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Key (size)"
+                                                value={attribute.key}
+                                                onChange={(event) => updateEditAttributeRow(index, 'key', event.target.value)}
+                                                className={baseInput}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Value (M)"
+                                                value={attribute.value}
+                                                onChange={(event) => updateEditAttributeRow(index, 'value', event.target.value)}
+                                                className={baseInput}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeEditAttributeRow(index)}
+                                                className="h-11 rounded-lg border border-[#d7cebf] px-3 text-xs uppercase tracking-[0.14em] text-[#6f685d] transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
+                                            >
+                                                X
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Variant Images</p>
+                                            <p className="text-[11px] text-[#8d8477]">{editVariantForm.imageFiles.length}/7</p>
+                                        </div>
+                                        <input
+                                            ref={editImageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleEditImageSelect}
+                                            className="block w-full rounded-lg border border-[#d7cebf] bg-[#f8f4ec] px-3 py-2.5 text-sm text-[#1f1b16] file:mr-3 file:rounded-md file:border-0 file:bg-[#1f1b16] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:uppercase file:tracking-widest file:text-[#f4f0e9]"
+                                        />
+                                        <p className="text-xs text-[#8d8477]">Upload new images to replace the current set.</p>
+
+                                        {editVariantImageDrafts.length > 0 && (
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {editVariantImageDrafts.map((image, index) => (
+                                                    <div key={image.id} className="relative">
+                                                        <img
+                                                            src={image.url}
+                                                            alt={`Existing variant ${index + 1}`}
+                                                            className="h-12 w-12 rounded-md border border-[#d7cebf] object-cover"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeEditVariantDraftImage(image.id)}
+                                                            className="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#1f1b16] text-[10px] text-[#f4f0e9]"
+                                                        >
+                                                            x
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {editImagePreviews.length > 0 && (
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {editImagePreviews.map((preview, index) => (
+                                                    <div key={preview.key} className="relative">
+                                                        <img
+                                                            src={preview.url}
+                                                            alt={`New variant upload ${index + 1}`}
+                                                            className="h-12 w-12 rounded-md border border-[#d7cebf] object-cover"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeEditImage(index)}
+                                                            className="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#1f1b16] text-[10px] text-[#f4f0e9]"
+                                                        >
+                                                            x
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                <label className="space-y-1.5">
+                                    <span className="text-xs uppercase tracking-[0.14em] text-[#6f685d]">Stock</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={editVariantForm.stock}
+                                        onChange={(event) => setEditVariantForm((prev) => ({ ...prev, stock: event.target.value }))}
+                                        className={baseInput}
+                                        required
+                                    />
+                                </label>
+                                <label className="space-y-1.5">
+                                    <span className="text-xs uppercase tracking-[0.14em] text-[#6f685d]">Price Amount</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        placeholder="Optional"
+                                        value={editVariantForm.priceAmount}
+                                        onChange={(event) => setEditVariantForm((prev) => ({ ...prev, priceAmount: event.target.value }))}
+                                        className={baseInput}
+                                    />
+                                </label>
+                                <label className="space-y-1.5">
+                                    <span className="text-xs uppercase tracking-[0.14em] text-[#6f685d]">Currency</span>
+                                    <select
+                                        value={editVariantForm.priceCurrency}
+                                        onChange={(event) => setEditVariantForm((prev) => ({ ...prev, priceCurrency: event.target.value }))}
+                                        className={baseInput}
+                                        required
+                                    >
+                                        <option value="INR">INR</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                        <option value="JPY">JPY</option>
+                                        <option value="CNY">CNY</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={closeEditVariant}
+                                    disabled={isUpdatingVariant}
+                                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#c8bdaa] px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#5f584d] transition hover:border-[#1f1b16] hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isUpdatingVariant}
+                                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#1f1b16] bg-[#1f1b16] px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {isUpdatingVariant ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isEditingImages && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-2xl rounded-xl border border-[#d7cebf] bg-[#f8f4ec] p-5 shadow-xl">
+                        <h3 className="text-lg font-semibold" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+                            Update Product Images
+                        </h3>
+                        <p className="mt-2 text-sm text-[#5f584d]">
+                            Keep, remove, or add images. Total images must be between 1 and 7.
+                        </p>
+
+                        <form onSubmit={handleUpdateImages} className="mt-4 space-y-4">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Current Images</p>
+                                {imageDrafts.length === 0 && (
+                                    <p className="mt-2 text-sm text-[#8d8477]">No current images selected.</p>
+                                )}
+                                {imageDrafts.length > 0 && (
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {imageDrafts.map((image) => (
+                                            <div key={image.id} className="relative">
+                                                <img
+                                                    src={image.url}
+                                                    alt="Product"
+                                                    className="h-16 w-16 rounded-md border border-[#d7cebf] object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeDraftImage(image.id)}
+                                                    className="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#1f1b16] text-[10px] text-[#f4f0e9]"
+                                                >
+                                                    x
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6f685d]">Add New Images</p>
+                                    <p className="text-[11px] text-[#8d8477]">{newImageFiles.length}/7</p>
+                                </div>
+                                <input
+                                    ref={productImageInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleProductImageSelect}
+                                    className="block w-full rounded-lg border border-[#d7cebf] bg-[#f8f4ec] px-3 py-2.5 text-sm text-[#1f1b16] file:mr-3 file:rounded-md file:border-0 file:bg-[#1f1b16] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:uppercase file:tracking-widest file:text-[#f4f0e9]"
+                                />
+                                <p className="text-xs text-[#8d8477]">Uploads are added to the remaining list.</p>
+
+                                {imageFilePreviews.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {imageFilePreviews.map((preview, index) => (
+                                            <div key={preview.key} className="relative">
+                                                <img
+                                                    src={preview.url}
+                                                    alt={`New product ${index + 1}`}
+                                                    className="h-16 w-16 rounded-md border border-[#d7cebf] object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeNewImage(index)}
+                                                    className="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#1f1b16] text-[10px] text-[#f4f0e9]"
+                                                >
+                                                    x
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={closeImageEditor}
+                                    disabled={isUpdatingImages}
+                                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#c8bdaa] px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#5f584d] transition hover:border-[#1f1b16] hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isUpdatingImages}
+                                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#1f1b16] bg-[#1f1b16] px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {isUpdatingImages ? 'Saving...' : 'Save Images'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {pendingDeleteVariantId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

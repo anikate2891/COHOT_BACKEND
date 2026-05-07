@@ -7,10 +7,13 @@ import Loader from '../../auth/components/Loader.jsx';
 
 const DashBoard = () => {
     const navigate = useNavigate();
-    const { handelGetSellerProducts } = useProduct();
+    const { handelGetSellerProducts, handelDeleteProduct } = useProduct();
     const sellerProducts = useSelector((state) => state.product.sellerProducts);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [actionMessage, setActionMessage] = useState('');
+    const [pendingDeleteProductId, setPendingDeleteProductId] = useState('');
+    const [deletingProductId, setDeletingProductId] = useState('');
 
     useEffect(() => {
         let isMounted = true;
@@ -53,6 +56,29 @@ const DashBoard = () => {
         const { amount, currency } = price;
         if (amount === undefined || amount === null) return 'N/A';
         return `${currency || 'INR'} ${amount}`;
+    }
+
+    function handleDeleteProductClick(productId, event) {
+        event.stopPropagation();
+        setActionMessage('');
+        setPendingDeleteProductId(productId);
+    }
+
+    async function confirmDeleteProduct() {
+        if (!pendingDeleteProductId) return;
+
+        try {
+            setDeletingProductId(pendingDeleteProductId);
+            await handelDeleteProduct(pendingDeleteProductId);
+            await handelGetSellerProducts();
+            setActionMessage('Product deleted successfully.');
+        } catch (error) {
+            const apiMessage = error?.response?.data?.message;
+            setActionMessage(apiMessage || 'Unable to delete product.');
+        } finally {
+            setPendingDeleteProductId('');
+            setDeletingProductId('');
+        }
     }
 
     return (
@@ -112,6 +138,12 @@ const DashBoard = () => {
                         </div>
                     )}
 
+                    {!isLoading && !errorMessage && actionMessage && (
+                        <div className="mt-6 border border-[#d9cebe] bg-[#eee7da] p-4 text-sm text-[#3f3930]">
+                            {actionMessage}
+                        </div>
+                    )}
+
                     {!isLoading && !errorMessage && sellerProducts.length === 0 && (
                         <div className="mt-8 border border-[#d9cebe] bg-[#eee7da] p-5 text-sm text-[#3f3930]">
                             No products found. Start by creating your first product.
@@ -124,9 +156,12 @@ const DashBoard = () => {
                                 const imageUrl = product?.images?.[0]?.url;
                                 return (
                                     <article
-                                    onClick={()=>{navigate(`/seller/product/${product._id}`)}}
-                                    
-                                    key={product._id} className="space-y-3">
+                                        onClick={() => {
+                                            navigate(`/seller/product/${product._id}`)
+                                        }}
+                                        key={product._id}
+                                        className="group cursor-pointer space-y-3"
+                                    >
                                         <div className="aspect-square overflow-hidden bg-[#dbd1c3]">
                                             {imageUrl ? (
                                                 <img src={imageUrl} alt={product.title} className="h-full w-full object-cover" />
@@ -151,6 +186,15 @@ const DashBoard = () => {
                                                 </p>
                                             </div>
                                         </div>
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={(event) => handleDeleteProductClick(product._id, event)}
+                                                className="inline-flex h-9 items-center justify-center rounded-md border border-red-700 bg-red-700 px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f4f0e9] opacity-0 transition group-hover:opacity-100 hover:bg-transparent hover:text-red-700"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </article>
                                 );
                             })}
@@ -165,6 +209,38 @@ const DashBoard = () => {
                     )}
                 </section>
             </div>
+
+            {pendingDeleteProductId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-sm rounded-xl border border-[#d7cebf] bg-[#f8f4ec] p-5 shadow-xl">
+                        <h3 className="text-lg font-semibold" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+                            Delete Product
+                        </h3>
+                        <p className="mt-2 text-sm text-[#5f584d]">
+                            Are you sure you want to delete this product and all its variants? This action cannot be undone.
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPendingDeleteProductId('')}
+                                disabled={Boolean(deletingProductId)}
+                                className="inline-flex h-9 items-center justify-center rounded-md border border-[#c8bdaa] px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#5f584d] transition hover:border-[#1f1b16] hover:text-[#1f1b16] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDeleteProduct}
+                                disabled={Boolean(deletingProductId)}
+                                className="inline-flex h-9 items-center justify-center rounded-md border border-red-700 bg-red-700 px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#f4f0e9] transition hover:bg-transparent hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {deletingProductId ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     )
 }

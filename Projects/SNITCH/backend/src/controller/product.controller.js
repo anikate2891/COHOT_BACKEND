@@ -2,9 +2,9 @@ import productModel from "../model/product.model.js";
 import { uploadImageToStorage } from "../services/storage.service.js";
 
 export async function createProductController(req, res) {
-    console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
-    const { title, description, priceAmount, priceCurrency, stock, attributes } = req.body;
+    // console.log("req.body:", req.body);
+    // console.log("req.files:", req.files);
+    const { title, description, priceAmount, priceCurrency, stock, attributes, category } = req.body;
     const seller = req.user;
 
     try {
@@ -46,9 +46,10 @@ export async function createProductController(req, res) {
         const product = await productModel.create({
             title,
             description,
+            category,
             price: { amount: priceAmount, currency: priceCurrency || 'INR' },
             seller: seller._id,
-            images, // ✅ Ab [{url: '...'}, {url: '...'}] hoga
+            images,
             variants: shouldCreateVariant
                 ? [{
                     images,
@@ -81,7 +82,10 @@ export async function getSellerProductsController(req, res) {
 
 export async function getAllProductsController(req, res) {
     try {
-        const products = await productModel.find();
+        const { category } = req.query; 
+        const filter = category ? { category } : {};
+
+        const products = await productModel.find(filter);
         res.status(200).json({ message: 'Products fetched successfully', success: true, products });
     } catch (error) {
         console.error('getAllProductsController:', error);
@@ -228,6 +232,181 @@ export async function deleteProductVariantController(req, res) {
         });
     } catch (error) {
         console.error('Variant delete error:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export async function updateProductVariantController(req, res) {
+    try {
+        const { productId, variantId } = req.params;
+
+        const product = await productModel.findOne({ _id: productId, seller: req.user._id });
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        const variant = product.variants.id(variantId);
+        if (!variant) {
+            return res.status(404).json({ success: false, message: 'Variant not found' });
+        }
+
+        if (req.body.stock !== undefined) {
+            const parsedStock = Number(req.body.stock);
+            if (Number.isNaN(parsedStock) || parsedStock < 0) {
+                return res.status(400).json({ success: false, message: 'Stock must be a non-negative number.' });
+            }
+            variant.stock = parsedStock;
+        }
+
+        if (req.body.attributes) {
+            let parsedAttributes = {};
+            try {
+                parsedAttributes = JSON.parse(req.body.attributes || '{}');
+            } catch {
+                return res.status(400).json({ success: false, message: 'Attributes must be valid JSON.' });
+            }
+            variant.attributes = parsedAttributes;
+        }
+
+        const rawPriceAmount = req.body.priceAmount;
+        const hasPriceAmount = rawPriceAmount !== undefined && rawPriceAmount !== null && String(rawPriceAmount).trim() !== '';
+        const parsedPriceAmount = hasPriceAmount ? Number(rawPriceAmount) : Number(variant.price?.amount);
+
+        if (Number.isNaN(parsedPriceAmount) || parsedPriceAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'Price amount must be greater than 0 when provided.' });
+        }
+
+        if (hasPriceAmount || req.body.priceCurrency) {
+            variant.price = {
+                amount: parsedPriceAmount,
+                currency: req.body.priceCurrency || variant.price?.currency || 'INR',
+            };
+        }
+
+        let existingImages = null;
+        if (req.body.existingImages) {
+            try {
+                existingImages = JSON.parse(req.body.existingImages);
+            } catch {
+                return res.status(400).json({ success: false, message: 'Existing images must be valid JSON.' });
+            }
+
+            if (!Array.isArray(existingImages)) {
+                return res.status(400).json({ success: false, message: 'Existing images must be an array.' });
+            }
+
+            existingImages = existingImages
+                .filter((image) => image && typeof image.url === 'string' && image.url.trim() !== '')
+                .map((image) => ({ url: image.url.trim() }));
+        }
+
+        const files = req.files;
+        const uploadedImages = await Promise.all((files || []).map(async (file) => {
+            const image = await uploadImageToStorage({
+                buffer: file.buffer,
+                filename: file.originalname,
+            });
+            return { url: image };
+        }));
+
+        if (existingImages || uploadedImages.length > 0) {
+            const nextImages = [...(existingImages || []), ...uploadedImages];
+            if (nextImages.length === 0) {
+                return res.status(400).json({ success: false, message: 'At least one image is required.' });
+            }
+            variant.images = nextImages;
+        }
+
+        await product.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Variant updated successfully',
+            variant,
+        });
+    } catch (error) {
+        console.error('Variant update error:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export async function deleteProductController(req, res) {
+    try {
+        const { productId } = req.params;
+
+        const deletedProduct = await productModel.findOneAndDelete({
+            _id: productId,
+            seller: req.user._id,
+        });
+
+        if (!deletedProduct) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Product deleted successfully',
+            productId,
+        });
+    } catch (error) {
+        console.error('Product delete error:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export async function updateProductImagesController(req, res) {
+    try {
+        const { productId } = req.params;
+
+        const product = await productModel.findOne({ _id: productId, seller: req.user._id });
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        let existingImages = null;
+        if (req.body.existingImages) {
+            try {
+                existingImages = JSON.parse(req.body.existingImages);
+            } catch {
+                return res.status(400).json({ success: false, message: 'Existing images must be valid JSON.' });
+            }
+
+            if (!Array.isArray(existingImages)) {
+                return res.status(400).json({ success: false, message: 'Existing images must be an array.' });
+            }
+
+            existingImages = existingImages
+                .filter((image) => image && typeof image.url === 'string' && image.url.trim() !== '')
+                .map((image) => ({ url: image.url.trim() }));
+        }
+
+        const files = req.files;
+        const uploadedImages = await Promise.all((files || []).map(async (file) => {
+            const url = await uploadImageToStorage({
+                buffer: file.buffer,
+                filename: file.originalname,
+                folder: 'products'
+            });
+            return { url };
+        }));
+
+        if (existingImages || uploadedImages.length > 0) {
+            const nextImages = [...(existingImages || []), ...uploadedImages];
+            if (nextImages.length === 0) {
+                return res.status(400).json({ success: false, message: 'At least one image is required.' });
+            }
+            product.images = nextImages;
+        }
+
+        await product.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Product images updated successfully',
+            images: product.images,
+        });
+    } catch (error) {
+        console.error('Product image update error:', error);
         return res.status(500).json({ success: false, message: error.message });
     }
 }

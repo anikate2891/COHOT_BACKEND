@@ -80,6 +80,7 @@ const Cart = () => {
             images.slice(0, 2).forEach((img, index) => {
                 items.push({
                     id: `${item._id}-${index}`,
+                    productId: item.product?._id,
                     title: item.product.title,
                     imageUrl: img.url,
                     price: currentPrice || item.price,
@@ -87,7 +88,7 @@ const Cart = () => {
             });
         });
 
-        return items.slice(0, 3);
+        return items.filter((item) => item.productId).slice(0, 3);
     }, [cartitems]);
 
     return (
@@ -220,7 +221,11 @@ const Cart = () => {
                                 </p>
                                 <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     {suggestions.map((item) => (
-                                        <div key={item.id} className="bg-[#f7f3eb] border border-[#e1d8c9] p-4">
+                                        <Link
+                                            key={item.id}
+                                            to={`/product/${item.productId}`}
+                                            className="block bg-[#f7f3eb] border border-[#e1d8c9] p-4 transition hover:border-[#1f1b16]"
+                                        >
                                             <div className="aspect-4/5 overflow-hidden bg-[#eae4d9]">
                                                 <img
                                                     src={item.imageUrl}
@@ -241,7 +246,7 @@ const Cart = () => {
                                                     {item.price.currency} {item.price.amount.toLocaleString()}
                                                 </p>
                                             </div>
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>

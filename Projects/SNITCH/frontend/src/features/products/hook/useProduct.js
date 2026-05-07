@@ -1,4 +1,4 @@
-import { createProducts, getSellerProducts,getAllProducts, getProductDetails, createProductVariant, updateProductVariantStock, deleteProductVariant } from '../services/product.api.js';
+import { createProducts, getSellerProducts,getAllProducts, getProductDetails, createProductVariant, updateProductVariantStock, deleteProductVariant, deleteProduct, updateProductVariant, updateProductImages } from '../services/product.api.js';
 import { useDispatch } from 'react-redux';
 import { setSellerProducts, setAllProducts } from '../state/product.slice.js';
 import { useCallback } from 'react';
@@ -69,12 +69,42 @@ export const useProduct = () => {
         }
     }, []);
 
+    const handelUpdateProductVariant = useCallback(async (productId, variantId, variantData) => {
+        try {
+            const response = await updateProductVariant(productId, variantId, variantData);
+            return response.variant;
+        } catch (error) {
+            console.error('Error updating product variant:', error);
+            throw error;
+        }
+    }, []);
+
+    const handelUpdateProductImages = useCallback(async (productId, imageData) => {
+        try {
+            const response = await updateProductImages(productId, imageData);
+            return response.images;
+        } catch (error) {
+            console.error('Error updating product images:', error);
+            throw error;
+        }
+    }, []);
+
     const handelDeleteProductVariant = useCallback(async (productId, variantId) => {
         try {
             const response = await deleteProductVariant(productId, variantId);
             return response.variantId;
         } catch (error) {
             console.error('Error deleting product variant:', error);
+            throw error;
+        }
+    }, []);
+
+    const handelDeleteProduct = useCallback(async (productId) => {
+        try {
+            const response = await deleteProduct(productId);
+            return response.productId;
+        } catch (error) {
+            console.error('Error deleting product:', error);
             throw error;
         }
     }, []);
@@ -86,6 +116,9 @@ export const useProduct = () => {
         handelGetProductDetails,
         handelCreateProductVariant,
         handelUpdateProductVariantStock,
+        handelUpdateProductVariant,
+        handelUpdateProductImages,
         handelDeleteProductVariant,
+        handelDeleteProduct,
     };
 }

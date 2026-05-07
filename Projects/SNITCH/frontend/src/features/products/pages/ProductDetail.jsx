@@ -185,9 +185,9 @@ const ProductDetail = () => {
     return (
         <main className="min-h-screen bg-[#f4f0e9] px-5 py-8 text-[#1f1b16] sm:px-8 lg:px-10">
             <div className="mx-auto max-w-7xl">
-                <section className="grid gap-8 lg:grid-cols-[0.78fr_0.92fr] lg:gap-12">
+                <section className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
                     {/* Images */}
-                    <div className="mx-auto w-full max-w-lg lg:mx-0 lg:max-w-md">
+                    <div className="mx-auto w-full max-w-xl lg:mx-0 lg:max-w-lg">
                         <div className="flex items-start gap-3">
                             <div className="flex w-15 shrink-0 flex-col gap-2">
                                 {(images.length > 0 ? images : [{ url: '' }]).map((image, index) => (

@@ -19,7 +19,9 @@ const Product = () => {
         priceAmount: '',
         priceCurrency: 'USD',
         stock: '',
-        attributes: [{ key: '', value: '' }],
+        color: '',
+        colorCustom: '',
+        attributes: [{ id: crypto.randomUUID(), key: '', value: '' }],
         images: [],
     });
 
@@ -52,14 +54,14 @@ const Product = () => {
     function addAttributeRow() {
         setFormData((prev) => ({
             ...prev,
-            attributes: [...prev.attributes, { key: '', value: '' }],
+            attributes: [...prev.attributes, { id: crypto.randomUUID(), key: '', value: '' }],
         }));
     }
 
     function removeAttributeRow(index) {
         setFormData((prev) => {
             if (prev.attributes.length === 1) {
-                return { ...prev, attributes: [{ key: '', value: '' }] };
+                return { ...prev, attributes: [{ id: crypto.randomUUID(), key: '', value: '' }] };
             }
             return {
                 ...prev,
@@ -119,6 +121,14 @@ const Product = () => {
                 return acc;
             }, {});
 
+            const colorValue = formData.color === 'Other'
+                ? formData.colorCustom.trim()
+                : formData.color.trim();
+
+            if (colorValue) {
+                normalizedAttributes.color = colorValue;
+            }
+
             if (Object.keys(normalizedAttributes).length > 0) {
                 payload.append('attributes', JSON.stringify(normalizedAttributes));
             }
@@ -138,7 +148,9 @@ const Product = () => {
                 priceAmount: '',
                 priceCurrency: 'USD',
                 stock: '',
-                attributes: [{ key: '', value: '' }],
+                color: '',
+                colorCustom: '',
+                attributes: [{ id: crypto.randomUUID(), key: '', value: '' }],
                 images: [],
             });
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -301,7 +313,7 @@ const Product = () => {
 
                                     <div className="space-y-2">
                                         {formData.attributes.map((attribute, index) => (
-                                            <div key={`${attribute.key}-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                            <div key={attribute.id} className="grid grid-cols-[1fr_1fr_auto] gap-2">
                                                 <input
                                                     type="text"
                                                     value={attribute.key}
@@ -329,6 +341,44 @@ const Product = () => {
                                     </div>
                                     <p className="text-xs text-[#8b8377]">Optional now, but helps buyers pick variants later.</p>
                                 </div>
+
+                                {/* Color */}
+                                <label className="block space-y-1.5">
+                                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6d665c]">Color</span>
+                                    <select
+                                        value={formData.color}
+                                        onChange={(event) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                color: event.target.value,
+                                                colorCustom: event.target.value === 'Other' ? prev.colorCustom : '',
+                                            }))
+                                        }
+                                        className={inputBase}
+                                    >
+                                        <option value="">Select color</option>
+                                        <option value="Black">Black</option>
+                                        <option value="White">White</option>
+                                        <option value="Brown">Brown</option>
+                                        <option value="Beige">Beige</option>
+                                        <option value="Blue">Blue</option>
+                                        <option value="Green">Green</option>
+                                        <option value="Red">Red</option>
+                                        <option value="Grey">Grey</option>
+                                        <option value="Yellow">Yellow</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    {formData.color === 'Other' && (
+                                        <input
+                                            type="text"
+                                            value={formData.colorCustom}
+                                            onChange={(event) => setFormData((prev) => ({ ...prev, colorCustom: event.target.value }))}
+                                            placeholder="Enter custom color"
+                                            className={inputBase}
+                                        />
+                                    )}
+                                    <p className="text-xs text-[#8b8377]">Saved as the <span className="font-semibold">color</span> attribute.</p>
+                                </label>
 
                                 {/* Images */}
                                 <div className="space-y-1.5">

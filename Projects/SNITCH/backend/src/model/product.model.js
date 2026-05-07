@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema({
         ref:'Users',
         required:true
     },
+    category: { type: String, required: true, trim: true },
     price:{
         type: priceSchema,
         required:true
