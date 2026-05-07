@@ -12,17 +12,21 @@ const Cart = () => {
         handleGetCartItems();
     }, []);
 
-    const calculateSubtotal = () => {
-        return cartitems?.reduce((total, item) => {
-            return total + ((item.price?.amount ?? 0) * item.quantity);
-        }, 0) || 0;
-    };
+    const totalPrice = useSelector((state) => state.cart.totalPrice);
+    const currency = useSelector((state) => state.cart.currency);
 
-    const subtotal = calculateSubtotal();
 
     const getVariantDetails = (item) => {
-        if (!item.product || typeof item.product === 'string') return null; // ← guard
-        return item.product.variants.find((v) => v._id === item.variant);
+        if (!item?.product || typeof item.product === "string") return null;
+        const variants = item.product.variants;
+        if (!variants) return null;
+        if (Array.isArray(variants)) {
+            const matched = variants.find(
+                (variant) => variant?._id?.toString() === item?.variant?.toString(),
+            );
+            return matched || variants[0] || null;
+        }
+        return variants;
     };
 
     const getCurrentPrice = (item, variant) => {
@@ -38,8 +42,9 @@ const Cart = () => {
 
         cartitems.forEach((item) => {
             const variant = getVariantDetails(item);
+            const currentPrice = getCurrentPrice(item, variant);
             const variantImages = variant?.images || [];
-            const productImages = item.product.images || [];
+            const productImages = item.product?.images || [];
             const images = [...variantImages, ...productImages];
 
             images.slice(0, 2).forEach((img, index) => {
@@ -47,7 +52,7 @@ const Cart = () => {
                     id: `${item._id}-${index}`,
                     title: item.product.title,
                     imageUrl: img.url,
-                    price: item.price,
+                    price: currentPrice || item.price,
                 });
             });
         });
@@ -87,9 +92,9 @@ const Cart = () => {
                             ) : (
                                 cartitems?.map((item) => {
                                     const variant = getVariantDetails(item);
-                                    const imageUrl = variant?.images?.[0]?.url || item.product.images?.[0]?.url;
-                                    const size = variant?.attributes?.Size || 'N/A';
-                                    const color = variant?.attributes?.color || 'N/A';
+                                    const imageUrl = variant?.images?.[0]?.url || item.product?.images?.[0]?.url;
+                                    const size = variant?.attributes?.Size || variant?.attributes?.size || "N/A";
+                                    const color = variant?.attributes?.color || "N/A";
                                     const stock = variant?.stock || 0;
                                     const currentPrice = getCurrentPrice(item, variant);
                                     const currentAmount = currentPrice?.amount ?? null;
@@ -130,7 +135,7 @@ const Cart = () => {
                                                         </div>
                                                     </div>
                                                     <div className="text-sm font-medium">
-                                                        {item.price?.currency ?? 'INR'} {item.price?.amount?.toLocaleString() ?? 0}
+                                                        {currentPrice?.currency ?? "INR"} {currentPrice?.amount?.toLocaleString() ?? 0}
                                                     </div>
                                                 </div>
 
@@ -138,7 +143,7 @@ const Cart = () => {
                                                     <div
                                                         className={`mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] ${priceDelta > 0 ? 'text-red-600' : 'text-green-600'}`}
                                                     >
-                                                        Price {priceDelta > 0 ? 'increased' : 'decreased'} by {item.price?.currency ?? currentPrice?.currency ?? 'INR'} {Math.abs(priceDelta).toLocaleString()}
+                                                        Price {priceDelta > 0 ? "increased" : "decreased"} by {item.price?.currency ?? currentPrice?.currency ?? "INR"} {Math.abs(priceDelta).toLocaleString()}
                                                     </div>
                                                 )}
 
@@ -158,6 +163,7 @@ const Cart = () => {
                                                         <button
                                                             className="flex h-8 w-8 items-center justify-center transition hover:bg-[#eae4d9]"
                                                             onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                                                            disabled={stock > 0 && item.quantity >= stock}
                                                         >
                                                             +
                                                         </button>
@@ -225,7 +231,7 @@ const Cart = () => {
                             <div className="space-y-4 text-xs font-semibold uppercase tracking-widest text-[#1f1b16]">
                                 <div className="flex justify-between items-center py-2 border-b border-[#d7cebf]/50">
                                     <span className="text-[#6c655a]">Subtotal</span>
-                                    <span>INR {subtotal.toLocaleString()}</span>
+                                    <span>{currency} {totalPrice?.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#d7cebf]/50">
                                     <span className="text-[#6c655a]">Shipping</span>
@@ -237,7 +243,7 @@ const Cart = () => {
                                 </div>
                                 <div className="flex justify-between items-center py-6 text-sm">
                                     <span>Total Value</span>
-                                    <span className="text-lg">INR {subtotal.toLocaleString()}</span>
+                                    <span className="text-lg">{currency} {totalPrice?.toLocaleString()}</span>
                                 </div>
                             </div>
 

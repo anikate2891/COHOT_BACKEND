@@ -13,6 +13,7 @@ const Nav = () => {
   const hideNav = location.pathname === "/login" || location.pathname === "/register";
   const cartCount = cartItems?.length || 0;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
   useEffect(() => {
@@ -58,7 +59,31 @@ const Nav = () => {
                 Snitch
               </Link>
             </div>
-            <nav className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6c655a]">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d7cebf] text-[#6c655a] transition hover:border-[#1f1b16] hover:text-[#1f1b16] md:hidden"
+                aria-label="Toggle navigation"
+                aria-expanded={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
+                </svg>
+              </button>
+              <nav className="hidden items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6c655a] md:flex">
               <Link
                 to="/"
                 className="inline-flex items-center gap-2 rounded-full border border-[#d7cebf] px-4 py-2 transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
@@ -187,7 +212,95 @@ const Nav = () => {
                 </div>
               )}
             </nav>
+            </div>
           </div>
+
+          {isMobileMenuOpen && (
+            <div className="border-t border-[#e1d8c9] bg-[#f7f3eb] px-4 py-4 sm:px-8 lg:px-12 md:hidden">
+              <div className="flex flex-col gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6c655a]">
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d7cebf] px-4 py-2 transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 11.5L12 4l9 7.5" />
+                    <path d="M5 10.5V20h14v-9.5" />
+                  </svg>
+                  Home
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#d7cebf] px-4 py-2 transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
+                >
+                  <span className="relative">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="9" cy="21" r="1" />
+                      <circle cx="20" cy="21" r="1" />
+                      <path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
+                    </svg>
+                    {cartCount > 0 && (
+                      <span className="absolute -right-2.5 -top-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#1f1b16] px-1 text-[9px] font-semibold text-[#f4f0e9]">
+                        {cartCount}
+                      </span>
+                    )}
+                  </span>
+                  Cart
+                </Link>
+                {user?.role === "seller" && (
+                  <Link
+                    to="/seller/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="inline-flex items-center gap-2 rounded-full border border-[#d7cebf] px-4 py-2 transition hover:border-[#1f1b16] hover:text-[#1f1b16]"
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {!user && (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="inline-flex items-center gap-2 rounded-full border border-[#1f1b16] bg-[#1f1b16] px-4 py-2 text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]"
+                  >
+                    Login
+                  </Link>
+                )}
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="inline-flex items-center justify-center rounded-full border border-[#1f1b16] bg-[#1f1b16] px-4 py-2 text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]"
+                  >
+                    Logout
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </header>
       )}
 
