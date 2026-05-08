@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useProduct } from '../hook/useProduct.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../../auth/components/Loader.jsx';
 
 const Home = () => {
@@ -11,6 +11,7 @@ const Home = () => {
     const categories = useSelector((state) => state.product.categories);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [searchParams] = useSearchParams();
 
     const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -58,11 +59,17 @@ const Home = () => {
             year: 'numeric',
         });
     }
-    const filteredProducts = selectedCategory === 'All'
-    ? allProducts
-    : allProducts.filter(p => p.category === selectedCategory);
+    const searchQuery = searchParams.get('q') || '';
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const filteredProducts = allProducts.filter((p) => {
+        const matchCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        const title = p?.title ? p.title.toLowerCase() : '';
+        const matchSearch = normalizedQuery.length === 0 || title.includes(normalizedQuery);
+        return matchCategory && matchSearch;
+    });
 
     const displayCategories = ['All', ...categories];
+    const headingTitle = selectedCategory === 'All' ? 'All Products' : selectedCategory;
     return (
         <main className="min-h-screen bg-[#f4f0e9] text-[#1f1b16]">
             <div className="mx-auto max-w-350 px-5 py-8 sm:px-8 lg:px-10">
@@ -70,7 +77,7 @@ const Home = () => {
                     <p className="text-[11px] uppercase tracking-[0.18em] text-[#7f776b]">Atelier Selections</p>
                     <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
                         <h1 className="text-5xl leading-none sm:text-6xl" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-                            All Products
+                            {headingTitle}
                         </h1>
                         <p className="text-xs uppercase tracking-[0.14em] text-[#6c655b]">
                             {allProducts.length} item{allProducts.length === 1 ? '' : 's'}
@@ -87,7 +94,8 @@ const Home = () => {
                     <span>Showing all products</span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-2">
                     {displayCategories.map(cat => (
                         <button
                         key={cat}
@@ -101,6 +109,7 @@ const Home = () => {
                         {cat}
                         </button>
                     ))}
+                    </div>
                 </div>
 
                 {isLoading && (

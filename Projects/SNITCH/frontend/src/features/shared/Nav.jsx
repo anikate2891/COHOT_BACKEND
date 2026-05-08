@@ -1,20 +1,32 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useUserAuth } from "../auth/hook/userAuth.js";
 
 const Nav = () => {
   const user = useSelector((state) => state.auth.user);
   const cartItems = useSelector((state) => state.cart.items);
+  const allProducts = useSelector((state) => state.product.allProducts);
   const { handleLogout } = useUserAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/";
   const hideNav = location.pathname === "/login" || location.pathname === "/register";
   const cartCount = cartItems?.length || 0;
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
   const userMenuRef = useRef(null);
+  const toastTimerRef = useRef(null);
+  const searchValue = searchParams.get("q") || "";
+  const suggestions = searchValue.trim().length === 0
+  ? []
+  : allProducts
+      .filter(p => p.title.toLowerCase().includes(searchValue.trim().toLowerCase()))
+      .slice(0, 6);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -27,8 +39,57 @@ const Nav = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const pendingToast = sessionStorage.getItem('authToast');
+    if (pendingToast === 'logged-in') {
+      sessionStorage.removeItem('authToast');
+      setTimeout(() => {
+        setToastMessage('Logged in');
+        setShowToast(true);
+        if (toastTimerRef.current) {
+          clearTimeout(toastTimerRef.current);
+        }
+        toastTimerRef.current = setTimeout(() => {
+          setShowToast(false);
+        }, 2000);
+      }, 0);
+    }
+  }, [user]);
+
+  function handleLogoutWithToast() {
+    setIsUserMenuOpen(false);
+    setIsMobileMenuOpen(false);
+    setToastMessage('Logged out');
+    setShowToast(true);
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
+    handleLogout();
+  }
+
   return (
     <div className="min-h-screen bg-[#f4f0e9] text-[#1f1b16]">
+      <div
+        role="status"
+        aria-live="polite"
+        className={`fixed left-1/2 top-6 z-50 -translate-x-1/2 rounded-full border border-[#caa85a] bg-[#e9b65a] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#1f1b16] shadow-[0_12px_30px_rgba(31,27,22,0.12)] transition-all duration-300 ease-out ${
+          showToast ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
+      >
+        {toastMessage}
+      </div>
       {!hideNav && (
         <header className="border-b border-[#d7cebf]">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8 lg:px-12">
@@ -60,6 +121,90 @@ const Nav = () => {
               </Link>
             </div>
             <div className="flex items-center gap-3">
+              {isHome && (
+                <div className="relative hidden md:flex">
+                  <label className="group relative">
+                    {/* existing search input — koi change nahi */}
+                    <input
+                      value={searchValue}
+                      onFocus={() => setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        const nextParams = new URLSearchParams(searchParams);
+                        if (next.trim().length === 0) {
+                          nextParams.delete("q");
+                        } else {
+                          nextParams.set("q", next);
+                        }
+                        setSearchParams(nextParams);
+                        setShowSuggestions(true);
+                      }}
+                      placeholder="Search products"
+                      className="w-56 rounded-full border border-[#d7cebf] bg-[#f7f3eb] py-2 pl-9 pr-10 text-[11px] uppercase tracking-[0.18em] text-[#1f1b16] transition-all duration-300 ease-out placeholder:text-[#8a8276] focus:w-96 focus:border-[#1f1b16] focus:bg-[#f4f0e9] focus:outline-none focus:shadow-lg"
+                    />
+                    {searchValue && (
+                      <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                          const nextParams = new URLSearchParams(searchParams);
+                          nextParams.delete("q");
+                          setSearchParams(nextParams);
+                          setShowSuggestions(false);
+                        }}
+                        className="absolute inset-y-0 right-2 flex items-center justify-center text-[#7c7469] transition hover:text-[#1f1b16]"
+                        aria-label="Clear search"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M18 6L6 18" />
+                          <path d="M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </label>
+
+  {/* Dropdown */}
+  {showSuggestions && suggestions.length > 0 && (
+    <div className="absolute left-0 top-full z-50 mt-2 w-96 border border-[#ddd3c4] bg-[#f8f4ec] shadow-lg">
+      {suggestions.map((product) => (
+        <button
+          key={product._id}
+          type="button"
+          onMouseDown={() => {
+            const nextParams = new URLSearchParams(searchParams);
+            nextParams.set("q", product.title);
+            setSearchParams(nextParams);
+            setShowSuggestions(false);
+          }}
+          className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[#ede6d8]"
+        >
+          {product?.images?.[0]?.url && (
+            <img
+              src={product.images[0].url}
+              alt={product.title}
+              className="h-8 w-8 object-cover border border-[#ddd3c4]"
+            />
+          )}
+          <span className="text-[11px] uppercase tracking-[0.14em] text-[#1f1b16]">
+            {product.title}
+          </span>
+        </button>
+      ))}
+    </div>
+  )}
+                </div>
+              )}
               <button
                 type="button"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d7cebf] text-[#6c655a] transition hover:border-[#1f1b16] hover:text-[#1f1b16] md:hidden"
@@ -182,8 +327,7 @@ const Nav = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setIsUserMenuOpen(false);
-                          handleLogout();
+                          handleLogoutWithToast();
                         }}
                         className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[#efe7db]"
                         role="menuitem"
@@ -218,6 +362,70 @@ const Nav = () => {
           {isMobileMenuOpen && (
             <div className="border-t border-[#e1d8c9] bg-[#f7f3eb] px-4 py-4 sm:px-8 lg:px-12 md:hidden">
               <div className="flex flex-col gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6c655a]">
+                {isHome && (
+                  <label className="relative">
+                    <span className="sr-only">Search products</span>
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[#8a8276]">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M21 21l-4.35-4.35" />
+                      </svg>
+                    </span>
+                    <input
+                      value={searchValue}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        const nextParams = new URLSearchParams(searchParams);
+                        if (next.trim().length === 0) {
+                          nextParams.delete("q");
+                        } else {
+                          nextParams.set("q", next);
+                        }
+                        setSearchParams(nextParams);
+                      }}
+                      placeholder="Search products"
+                      className="w-full rounded-full border border-[#d7cebf] bg-[#f4f0e9] py-2 pl-9 pr-10 text-[11px] uppercase tracking-[0.18em] text-[#1f1b16] transition-all duration-300 ease-out placeholder:text-[#8a8276] focus:border-[#1f1b16] focus:outline-none"
+                    />
+                    {searchValue && (
+                      <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                          const nextParams = new URLSearchParams(searchParams);
+                          nextParams.delete("q");
+                          setSearchParams(nextParams);
+                        }}
+                        className="absolute inset-y-0 right-2 flex items-center justify-center text-[#7c7469] transition hover:text-[#1f1b16]"
+                        aria-label="Clear search"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M18 6L6 18" />
+                          <path d="M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </label>
+                )}
                 <Link
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -290,8 +498,7 @@ const Nav = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      handleLogout();
+                      handleLogoutWithToast();
                     }}
                     className="inline-flex items-center justify-center rounded-full border border-[#1f1b16] bg-[#1f1b16] px-4 py-2 text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]"
                   >
