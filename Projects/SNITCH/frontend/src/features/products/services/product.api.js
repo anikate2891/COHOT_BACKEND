@@ -104,3 +104,13 @@ export async function deleteProduct(productId) {
         throw error;
     }
 }
+
+export async function getCategories() {
+    try {
+        const response = await productApi.get('/categories');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
+}

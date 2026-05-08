@@ -18,6 +18,7 @@ const Product = () => {
         description: '',
         priceAmount: '',
         priceCurrency: 'USD',
+        category: '',
         stock: '',
         color: '',
         colorCustom: '',
@@ -108,6 +109,7 @@ const Product = () => {
             setIsSubmitting(true);
             const payload = new FormData();
             payload.append('title', formData.title.trim());
+            payload.append('category', formData.category.trim()); 
             payload.append('description', formData.description.trim());
             payload.append('priceAmount', formData.priceAmount);
             payload.append('priceCurrency', formData.priceCurrency);
@@ -145,6 +147,7 @@ const Product = () => {
             setFormData({
                 title: '',
                 description: '',
+                category: '', 
                 priceAmount: '',
                 priceCurrency: 'USD',
                 stock: '',
@@ -232,6 +235,23 @@ const Product = () => {
                                         value={formData.title}
                                         onChange={handleChange}
                                         placeholder="Classic cotton shirt"
+                                        className={inputBase}
+                                        required
+                                    />
+                                </label>
+
+                                {/* Category */}
+                                <label className="block space-y-1.5">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6d665c]">Category</span>
+                                        <span className="text-[11px] font-semibold text-red-600">Never edit or change again.</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        placeholder="e.g. Tops, Dresses, Bottoms"
                                         className={inputBase}
                                         required
                                     />

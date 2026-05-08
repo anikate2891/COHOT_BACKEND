@@ -1,6 +1,6 @@
-import { createProducts, getSellerProducts,getAllProducts, getProductDetails, createProductVariant, updateProductVariantStock, deleteProductVariant, deleteProduct, updateProductVariant, updateProductImages } from '../services/product.api.js';
+import { createProducts, getSellerProducts,getAllProducts, getProductDetails, createProductVariant, updateProductVariantStock, deleteProductVariant, deleteProduct, updateProductVariant, updateProductImages, getCategories } from '../services/product.api.js';
 import { useDispatch } from 'react-redux';
-import { setSellerProducts, setAllProducts } from '../state/product.slice.js';
+import { setSellerProducts, setAllProducts, setCategories } from '../state/product.slice.js';
 import { useCallback } from 'react';
 
 
@@ -109,6 +109,17 @@ export const useProduct = () => {
         }
     }, []);
 
+    const handelGetCategories = useCallback(async () => {
+        try {
+            const response = await getCategories();
+            dispatch(setCategories(response.categories));
+            return response.categories;
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            throw error;
+        }
+    }, [dispatch]);
+
     return {
         handelCreateProduct,
         handelGetSellerProducts,
@@ -120,5 +131,6 @@ export const useProduct = () => {
         handelUpdateProductImages,
         handelDeleteProductVariant,
         handelDeleteProduct,
+        handelGetCategories
     };
 }

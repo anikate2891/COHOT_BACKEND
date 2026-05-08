@@ -8,13 +8,13 @@ const Home = () => {
     const navigate = useNavigate();
 
     const allProducts = useSelector((state) => state.product.allProducts);
+    const categories = useSelector((state) => state.product.categories);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const categories = ['All', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
 
-    const { handelGetAllProducts } = useProduct();
+    const { handelGetAllProducts, handelGetCategories } = useProduct();
 
     useEffect(() => {
         let isMounted = true;
@@ -23,7 +23,8 @@ const Home = () => {
             try {
                 setIsLoading(true);
                 setErrorMessage('');
-                await handelGetAllProducts();
+                // await handelGetAllProducts();
+                await Promise.all([handelGetAllProducts(), handelGetCategories()]);
             } catch (error) {
                 if (isMounted) {
                     const apiMessage = error?.response?.data?.message;
@@ -40,7 +41,7 @@ const Home = () => {
         return () => {
             isMounted = false;
         };
-    }, [handelGetAllProducts]);
+    }, [handelGetAllProducts, handelGetCategories]);
 
     function getDisplayPrice(price) {
         if (!price) return 'N/A';
@@ -61,6 +62,7 @@ const Home = () => {
     ? allProducts
     : allProducts.filter(p => p.category === selectedCategory);
 
+    const displayCategories = ['All', ...categories];
     return (
         <main className="min-h-screen bg-[#f4f0e9] text-[#1f1b16]">
             <div className="mx-auto max-w-350 px-5 py-8 sm:px-8 lg:px-10">
@@ -86,7 +88,7 @@ const Home = () => {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                    {categories.map(cat => (
+                    {displayCategories.map(cat => (
                         <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}

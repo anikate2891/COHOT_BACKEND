@@ -410,4 +410,12 @@ export async function updateProductImagesController(req, res) {
         return res.status(500).json({ success: false, message: error.message });
     }
 }
-    
+
+export async function getCategoriesController(req, res) {
+    try {
+        const categories = await productModel.distinct('category');
+        res.status(200).json({ success: true, categories });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch categories' });
+    }
+}
