@@ -1,7 +1,13 @@
 import cartModel from "../model/cart.model.js";
 import productModel from "../model/product.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
+import { createOrder } from "../services/payment.service.js";
 import mongoose from "mongoose";
+import { getCartDetails } from "../dao/cart.dao.js";
+import paymentModel from "../model/payment.model.js";
+import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
+
+
 
 export const addToCart = async (req, res) => {
   const { productId, variantId } = req.params;
@@ -82,60 +88,9 @@ export const getCart = async (req, res) => {
   try {
     const user = req.user;  
 //// Aggregation PipeLine Code
-    let cart = await cartModel.aggregate(
-        [
-          {
-            $match: {
-              user: new mongoose.Types.ObjectId(user._id)
-            },
-          },
-          { $unwind: { path: "$items" } },
-          {
-            $lookup: {
-              from: "products",
-              localField: "items.product",
-              foreignField: "_id",
-              as: "items.product",
-            },
-          },
-          { $unwind: { path: "$items.product" } },
-          {
-            $unwind: { path: "$items.product.variants" },
-          },
-          {
-            $match: {
-              $expr: {
-                $eq: ["$items.variant", "$items.product.variants._id"],
-              },
-            },
-          },
-          {
-            $addFields: {
-              itemPrice: {
-                price: {
-                  $multiply: [
-                    "$items.quantity",
-                    "$items.product.variants.price.amount",
-                  ],
-                },
-                currency: "$items.product.variants.price.currency",
-              },
-            },
-          },
-          {
-            $group: {
-              _id: "$_id",
-              totalPrice: { $sum: "$itemPrice.price" },
-              currency: {
-                $first: "$itemPrice.currency",
-              },
-              items: { $push: "$items" },
-            },
-          },
-        ],
-        { maxTimeMS: 60000, allowDiskUse: true },
-      );
+    let cart = await getCartDetails(user._id);
 // Aggregation PipeLine Code
+
 console.log("cart result:", cart);
     if (!cart.length) {
     await cartModel.create({ user: user._id });
@@ -200,3 +155,83 @@ export const updateCartItem = async (req, res) => {
     res.status(500).json({ message: "Server error", success: false });
   }
 };
+
+export const createOrderController = async (req, res) => {
+
+  const cart = await getCartDetails(req.user._id);
+
+  if (!cart.length || cart[0].items.length === 0) {
+    return res.status(400) .json({ message: "Cart is empty", success: false });
+  }
+
+  try {
+    const order = await createOrder( cart[0].totalPrice, cart[0].currency);
+    const payment = new paymentModel({
+      user: req.user._id,
+      price: {
+        amount: cart[0].totalPrice,
+        currency: cart[0].currency,
+      },
+      razorPayDetails: { orderId: order.id },
+      orderItems: cart[0].items.map((item) => ({
+        title: item.product.title,
+        productId: item.product._id,
+        variantId: item.variant._id,
+        quantity: item.quantity,
+        images: item.product.variants.images || item.product.images,
+        description: item.product.description,
+
+        price: {
+          amount: item.product.variants.price.amount || item.product.price.amount,
+          currency: item.product.variants.price.currency || item.product.price.currency,
+        }
+      })),
+    });
+
+    await payment.save();
+
+
+
+    return res.status(200).json({ message: "Order created", success: true, order });
+
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error", success: false });
+  }
+}
+
+export const verifyOrderController = async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  try {
+    const paymentRecord = await paymentModel.findOne({
+        "razorPayDetails.orderId": razorpay_order_id,
+        status: "pending" 
+      });
+      if (!paymentRecord) {
+        return res.status(404).json({ message: "Payment record not found", success: false });
+      }
+
+      const isPaymentValid = validatePaymentVerification(
+        { 
+          order_id: razorpay_order_id, 
+          payment_id: razorpay_payment_id 
+        }, razorpay_signature, process.env.RAZORPAY_KEY_SECRET
+      );
+
+      if (!isPaymentValid) {
+        paymentRecord.status = "failed";
+        await paymentRecord.save();
+        return res.status(400).json({ message: "Payment verification failed", success: false });
+      }
+
+      paymentRecord.status = "completed";
+      await paymentRecord.save();
+
+      return res.status(200).json({ message: "Payment verified successfully", success: true });
+    }
+
+  catch (error) {    
+    res.status(500).json({ message: "Server error", success: false });
+  }
+}

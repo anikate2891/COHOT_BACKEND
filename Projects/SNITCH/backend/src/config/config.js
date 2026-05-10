@@ -25,6 +25,14 @@ if (!process.env.IMAGE_KIT_KEY) {
     throw new Error("IMAGE_KIT_KEY is not defined in the environment variables.");
 }
 
+if (!process.env.RAZORPAY_KEY_ID) {
+    throw new Error("RAZORPAY_KEY_ID is not defined in the environment variables.");
+}
+
+if (!process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error("RAZORPAY_KEY_SECRET is not defined in the environment variables.");
+}
+
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
     PORT: process.env.PORT,
@@ -32,6 +40,8 @@ export const config = {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     IMAGE_KIT_KEY: process.env.IMAGE_KIT_KEY,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
     // NODE_ENV: process.env.NODE_ENV || "development",
 };
 

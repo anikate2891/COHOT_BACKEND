@@ -3,44 +3,52 @@ import { useSelector } from "react-redux";
 import { useGetCartItems, useCart } from "../hook/useCart.js";
 import { Link } from "react-router-dom";
 import { useRazorpay } from "react-razorpay";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-    const { error, isLoading, Razorpay } = useRazorpay();
-
     const cartitems = useSelector((state) => state.cart.items);
     const { handleGetCartItems } = useGetCartItems();
-    const { handleRemoveItem, handleUpdateQuantity } = useCart();
+    const { handleRemoveItem, handleUpdateQuantity, handleCreateOrder, handleVerifyOrder } = useCart();
+    const navigate = useNavigate();
+    const { error, isLoading, Razorpay } = useRazorpay();
+    const user = useSelector((state) => state.auth.user);
 
 
     useEffect(() => {
         handleGetCartItems();
     }, []);
 
-     const handlePayment = () => {
-    const options = {
-      key: "YOUR_RAZORPAY_KEY",
-      amount: 50000, // Amount in paise
-      currency: "INR",
-      name: "Test Company",
-      description: "Test Transaction",
-      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
-      handler: (response) => {
-        console.log(response);
-        alert("Payment Successful!");
-      },
-      prefill: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        contact: "9999999999",
-      },
-      theme: {
-        color: "#F37254",
-      },
-    };
+        const handleCheckout = async () => {
+            const response = await handleCreateOrder();
+            console.log(response);
+        
+            const order = response.order; // ✅ nested order nikalo
 
-    const razorpayInstance = new Razorpay(options);
-    razorpayInstance.open();
-  };
+                const options = {
+                key: "rzp_test_SnKGxazrMZkfGP", // ✅ actual key
+                amount: order.amount,
+                currency: order.currency,
+                name: "Snitch",
+                description: "Thank you for your purchase!",
+                order_id: order.id,
+                handler: async (response) => {
+                    console.log(response);
+                    const isVerified = await handleVerifyOrder(response);
+                    if (isVerified) {
+                        navigate(`/order-success?order_id=${response.razorpay_order_id}`);
+                    }
+                },
+                prefill: {
+                    name: user?.fullname,
+                    email: user?.email,
+                    contact: user?.contact,
+                },
+                theme: { color: "#F37254" },
+            };
+
+            const rzp = new Razorpay(options); // ✅ instance banao
+            rzp.open(); // ✅ checkout open karo
+        };
 
     const totalPrice = useSelector((state) => state.cart.totalPrice);
     const currency = useSelector((state) => state.cart.currency);
@@ -283,7 +291,7 @@ const Cart = () => {
                             </div>
 
                             <div className="space-y-3 pt-2">
-                                <button onClick={handlePayment}
+                                <button onClick={handleCheckout}
                                 className="h-12 w-full border border-[#1f1b16] bg-[#1f1b16] text-xs font-semibold uppercase tracking-[0.2em] text-[#f4f0e9] transition hover:bg-transparent hover:text-[#1f1b16]">
                                     Proceed to Checkout
                                 </button >

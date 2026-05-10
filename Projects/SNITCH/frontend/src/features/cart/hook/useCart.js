@@ -1,4 +1,4 @@
-import { addItem, getCartItems, removeItem, updateQuantity } from '../services/cart.api.js';
+import { addItem, getCartItems, removeItem, updateQuantity, createCartOrder, verifyCartOrder } from '../services/cart.api.js';
 import { useDispatch } from 'react-redux';
 import { 
     setItems as setCartItemsInCart,
@@ -58,5 +58,23 @@ export const useCart = () => {
         }
     }
 
-    return { handleAddItem, handleRemoveItem, handleUpdateQuantity };
+    async function handleCreateOrder() {
+        try {
+            const data = await createCartOrder();
+            return data;
+        } catch (error) {
+            console.error('Error creating cart order:', error);
+        }
+    }   
+
+    async function handleVerifyOrder({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) {
+        try {
+            const data = await verifyCartOrder({ razorpay_order_id, razorpay_payment_id, razorpay_signature });
+            return data.success;
+        } catch (error) {
+            console.error('Error verifying cart order:', error);
+        }
+    }
+
+    return { handleAddItem, handleRemoveItem, handleUpdateQuantity, handleCreateOrder, handleVerifyOrder };
 }
