@@ -1,1 +1,15 @@
 - Kubernetevs , Kubernetevs Support, Docker, YAML
+
+- NPM's
+    - docker build . -t cohort_kuber:latest [image creation]
+    - docker run -p 3000:3000 cohort_kuber [image running and changing into a container]
+    - docker ps
+    - docker stop <container_id>
+    : with that we have an Image of our application running in a docker container.
+
+    - Kubearnetes
+        - Ceate code -  kubectl apply -f <folder_path> [./k8s/deployment.yml]
+        - Ingress Controller Setup:
+            - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+        - Metric Api Server Setup:
+            - kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
