@@ -13,3 +13,5 @@
             - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
         - Metric Api Server Setup:
             - kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        - After rebuild image, restart the deployment:
+            - kubectl rollout restart deployment/<deployment_name> [express-deployment]
